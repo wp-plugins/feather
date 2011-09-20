@@ -29,7 +29,30 @@ class FeatherSettings extends FeatherBase {
 	**/
 	static function add_section(array $section,$option) {
 		extract($section);
-		add_settings_section($id,$title,__CLASS__.'::'.$callback,$option.'-'.$tab);
+		add_settings_section($id,$title,__CLASS__.'::section_callback',$option.'-'.$tab);
+	}
+
+	/**
+		Section callback
+			@public
+	**/
+	static function section_callback($section) {
+		// Check for section id
+		if($section['id']) {
+			$id=substr($section['id'],8);
+			// Reference tmp variable to settings
+			if(!isset(self::$tmp['settings'])) {
+				// Framework settings
+				if(isset(self::$setting))
+					self::$tmp['settings']=&self::$setting;
+				// Theme settings
+				if(isset(self::$theme_setting))
+					self::$tmp['settings']=&self::$theme_setting;
+			}
+			// Print section desc
+			if(self::$tmp['settings'][$id]['desc'])
+				self::print_section_desc(self::$tmp['settings'][$id]['desc']);
+		}
 	}
 
 	/**
@@ -174,36 +197,6 @@ class FeatherSettings extends FeatherBase {
 
 		// Print field
 		echo $output;
-	}
-
-	/**
-		Intercept calls to undefined static methods
-			@param $func string
-			@param $args array
-			@public
-	**/
-	static function __callStatic($func,array $args) {
-		// Reference tmp variable to settings
-		if(!isset(self::$tmp['settings'])) {
-			// Framework settings
-			if(isset(self::$setting))
-				self::$tmp['settings']=&self::$setting;
-			// Theme settings
-			if(isset(self::$theme_setting))
-				self::$tmp['settings']=&self::$theme_setting;
-		}
-		// Build array of sections
-		if(!isset(self::$tmp['sections']))
-			foreach(self::$tmp['settings'] as $id=>$setting)
-				self::$tmp['sections'][]=$id;
-		// Is function a setting section? 
-		if(in_array($func,self::$tmp['sections'])) {
-			// Print description
-			if(self::$tmp['settings'][$func]['desc'])
-				self::print_section_desc(self::$tmp['settings'][$func]['desc']);
-		} else {
-			trigger_error(sprintf(self::TEXT_Method,get_called_class().'::'.$func));
-		}
 	}
 
 }
