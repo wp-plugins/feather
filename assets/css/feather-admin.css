@@ -1,0 +1,63 @@
+/*
+Name: Feather Options Page Styles
+Desc: Base styles for option pages.
+File: feather-admin.css
+*/
+
+/* -- Settings Updated Message ------------------------- */
+
+.updated {
+  margin-top: 14px!important;
+  width: 796px;
+}
+
+
+/* -- Feather Container -------------------------------- */
+
+.feather {
+  margin-top: 14px;
+  padding: 0 14px;
+  position: relative;
+  width: 784px;
+}
+
+
+/* -- Section Title ------------------------------------ */
+
+.feather h3 {
+  background: none;
+  margin-top: 14px;
+  padding: 8px 0;
+}
+
+.feather h3:hover {
+  color: #464646;
+  cursor: default;
+}
+
+
+/* -- Image Placeholder -------------------------------- */
+
+.feather_image_placeholder {
+  margin-top: 20px;
+  width: 544px;
+}
+
+.feather_image_placeholder img {
+  border: 3px dashed #ccc;
+  height: 40px;
+  max-width: 544px;
+  width: auto;
+}
+
+/* -- Credit ------------------------------------------- */
+
+.feather p#wpbandit {
+  font-size: 11px;
+  position: absolute;
+  bottom: 18px;
+  right: 30px;
+}
+
+p#wpbandit, p#wpbandit a { color: #aaa; }
+p#wpbandit a:hover { color: #888; }
