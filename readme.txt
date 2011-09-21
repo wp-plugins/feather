@@ -3,7 +3,7 @@ Contributors: jermainemaree
 Tags: framework, theme framework
 Requires at least: 3.1
 Tested up to: 3.2.1
-Stable tag: 1.0
+Stable tag: 1.0.1
 
 Feather is a lightweight and powerful WordPress theme framework. Easily configure your theme using a configuration file.
 
@@ -11,22 +11,30 @@ Feather is a lightweight and powerful WordPress theme framework. Easily configur
 
 Feather is a lightweight and powerful WordPress theme framework by [WPBandit](http://wpbandit.com). The framework allows you to easily configure your theme using the WordPress Dashboard and multiple configuration files.
 
-#### Getting Started
+<h2>Getting Started</h2>
 
-**Feather Folder**
+There are two quick things you need to do before your theme can use the framework:
+
+<h4>Feather Folder</h4>
 
 Before activating the plugin you should create a **feather** folder in your theme’s directory. The framework will not initialize without this folder.
 
-**Core Config File**
+<h4>Core Config File</h4>
 
 You will also need to create a **config** folder inside of the feather folder. This file should be named **feather-config.php**. You can create an empty file for now.
 
+<h4>Additional Information</h4>
+
+Visit our [website](http://wpbandit.com/feather/) for more information.
+
 == Installation ==
 
+To quickly get going follow the instructions below:
+
 1. Upload feather to the `/wp-content/plugins/` directory
-2. Create a _feather_ folder in your theme's directory.
-3. Create a _config_ folder inside the _feather_ directory.
-4. Create an empty feather-config.php file in the _config_ directory.
+2. Create a **feather** folder in your theme's directory.
+3. Create a **config** folder inside the _feather_ directory.
+4. Create an empty **feather-config.php** file in the _config_ directory.
 5. Activate the plugin through the 'Plugins' menu in WordPress.
 
 == Frequently Asked Questions ==

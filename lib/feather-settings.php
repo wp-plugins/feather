@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherSettings
-		@version 1.0
+		@version 1.0.1
 **/
 
 //! Settings Class
@@ -97,8 +97,8 @@ class FeatherSettings extends FeatherBase {
 		$output='';
 		// Set attributes
 		$attrs=array(
-			'id'=>'bandit_'.$setting.'['.$id.']',
-			'name'=>'bandit_'.$setting.'['.$id.']'
+			'id'=>$setting.'['.$id.']',
+			'name'=>$setting.'['.$id.']'
 		);
 		// Set class
 		if(isset($class)) { $attrs['class']=$class; }
