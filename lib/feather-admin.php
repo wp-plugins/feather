@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherAdmin
-		@version 1.0.2
+		@version 1.0.4
 **/
 
 class FeatherAdmin extends FeatherBase {
@@ -34,8 +34,14 @@ class FeatherAdmin extends FeatherBase {
 			add_action('admin_init',__CLASS__.'::admin_init');
 		// Theme Meta
 		if(in_array(self::$vars['PAGENOW'],array('post.php','post-new.php')))
-			if(self::$theme_meta)
-				add_action('admin_init',__CLASS__.'::theme_meta');
+			if(self::$theme_meta) {
+				// Load Meta library
+				self::load_file('meta','lib');
+				// Add action to add meta boxes
+				add_action('add_meta_boxes','FeatherMeta::init');
+				// Add action to save meta
+				add_action('save_post','FeatherMeta::save_meta');
+			}
 	}
 
 	/**
@@ -279,59 +285,6 @@ class FeatherAdmin extends FeatherBase {
 	static function javascript() {
 		wp_enqueue_script('feather-admin-js',
 			FEATHER_URL.'assets/js/feather-admin.js',FALSE,20110915);
-	}
-
-	/**
-		Theme meta
-			@public
-	**/
-	static function theme_meta() {
-		// Load Meta library
-		self::load_file('meta','lib');
-		// Meta library name
-		$meta_lib='FeatherMeta';
-		// Process meta fields
-		foreach(self::$theme_meta as $mid=>$meta) {
-			self::process_meta_field($mid,$meta);
-		}
-		// Add action to save meta
-		add_action('save_post',$meta_lib.'::save_meta');
-	}
-
-	/**
-		Process meta field
-			@public
-	**/
-	static function process_meta_field($mid,array $fields) {
-		// Extract fields
-		extract($fields);
-
-		// Callback
-		if(!isset($callback))
-			$callback='FeatherMeta::create_meta_box';
-		// Context
-		if(!isset($context)) { $context='advanced'; }
-		// Priority
-		if(!isset($priority)) { $priority='low'; }
-		// Args
-		if(!isset($args)) { $args=array(); }
-
-		// Non-template meta box
-		if(!isset($template))
-			add_meta_box($mid,$title,$callback,$page,$context,$priority,$args);
-
-		// Template specific meta box
-		if(isset($template)) {
-			// Get post id
-			if(isset($_GET['post'])) { $post_id=esc_attr($_GET['post']); }
-			if(isset($_POST['post_ID'])) { $post_id=esc_attr($_POST['post_ID']); }
-			// Get template
-			if(isset($post_id))
-				$page_template=get_post_meta($post_id,'_wp_page_template',TRUE);
-			// Create meta box, if template matches
-			if(isset($page_template) && in_array($page_template,$template))
-				add_meta_box($mid,$title,$callback,$page,$context,$priority,$args);
-		}
 	}
 
 }

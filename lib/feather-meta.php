@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherMeta
-		@version 1.0.2
+		@version 1.0.4
 **/
 
 //! Add custom meta boxes
@@ -21,6 +21,77 @@ class FeatherMeta extends FeatherBase {
 	protected static
 		//! Nonce
 		$nonce;
+
+	/**
+		Init meta
+			@public
+	**/
+	static function init() {
+		global $current_screen;
+		// Loop through meta config
+		foreach(self::$theme_meta as $mid=>$meta) {
+			// Does meta apply to current page?
+			if($meta['page']==$current_screen->post_type) {
+				if(!isset($meta['count'])) {
+					// Add meta box
+					self::add_meta_box($mid,$meta);
+				} else {
+					for($i=1;$i<=$meta['count']; $i++) {
+						// Temp array for fields
+						$tmp=array();
+						// Store meta in tmp array
+						$tmp['meta']=$meta;
+						// Append number to fields
+						$tmp['mid']=$mid.$i;
+						foreach($meta['args'] as $fid=>$field) {
+							$tmp['meta']['args'][$fid]['id']=$meta['args'][$fid]['id'].$i;
+							$tmp['meta']['args'][$fid]['label']=$i.'. '.$meta['args'][$fid]['label'];
+						}
+						// Add meta box
+						self::add_meta_box($tmp['mid'],$tmp['meta']);
+					}
+					// Unset $tmp
+					unset($tmp);
+				}
+			}
+		}
+	}
+
+	/**
+		Process meta field
+			@private
+	**/
+	private static function add_meta_box($mid,array $fields) {
+		// Extract fields
+		extract($fields);
+
+		// Callback
+		if(!isset($callback))
+			$callback=__CLASS__.'::create_meta_box';
+		// Context
+		if(!isset($context)) { $context='advanced'; }
+		// Priority
+		if(!isset($priority)) { $priority='low'; }
+		// Args
+		if(!isset($args)) { $args=array(); }
+
+		// Non-template meta box
+		if(!isset($template))
+			add_meta_box($mid,$title,$callback,$page,$context,$priority,$args);
+
+		// Template specific meta box
+		if(isset($template)) {
+			// Get post id
+			if(isset($_GET['post'])) { $post_id=esc_attr($_GET['post']); }
+			if(isset($_POST['post_ID'])) { $post_id=esc_attr($_POST['post_ID']); }
+			// Get template
+			if(isset($post_id))
+				$page_template=get_post_meta($post_id,'_wp_page_template',TRUE);
+			// Create meta box, if template matches
+			if(isset($page_template) && in_array($page_template,$template))
+				add_meta_box($mid,$title,$callback,$page,$context,$priority,$args);
+		}
+	}
 
 	/**
 		Create meta boxes
@@ -160,26 +231,47 @@ class FeatherMeta extends FeatherBase {
 
 		// Loop through fields
 		foreach(self::$theme_meta as $mid=>$meta) {
-			if(isset($meta['args'])) {
-				foreach ($meta['args'] as $field) {
-					// Determine field count
-					$count=isset($field['count'])?$field['count']:'1';
-					// Save field
-					for($i=1;$i<=$count;$i++) {
-						// Prefix field ID
-						if($count=='1')
-							$id=$field['id'];
-						else
+			if($meta['page']==$_POST['post_type']) {
+				// Single
+				if(isset($meta['args']) && !isset($meta['count'])) {
+					foreach ($meta['args'] as $field) {
+						// Determine field count
+						$count=isset($field['count'])?$field['count']:'1';
+						// Save field
+						for($i=1;$i<=$count;$i++) {
+							// Prefix field ID
+							if($count=='1')
+								$id=$field['id'];
+							else
+								$id=$field['id'].$i;
+							// Old Value
+							$old=get_post_meta($post_id,$id,TRUE);
+							// New value
+							$new=isset($_POST[$id])?$_POST[$id]:FALSE;
+							// Save data
+							if($new && $new!=$old)
+								update_post_meta($post_id,$id,$new);
+							if(''==$new && $old)
+								delete_post_meta($post_id,$id,$old);
+						}
+					}
+				}
+				// Multiple
+				if(isset($meta['args']) && isset($meta['count'])) {
+					for($i=1;$i<=$meta['count'];$i++) {
+						foreach ($meta['args'] as $field) {
+							// Append number to field id
 							$id=$field['id'].$i;
-						// Old Value
-						$old=get_post_meta($post_id,$id,TRUE);
-						// New value
-						$new=isset($_POST[$id])?$_POST[$id]:FALSE;
-						// Save data
-						if($new && $new!=$old)
-							update_post_meta($post_id,$id,$new);
-						if(''==$new && $old)
-							delete_post_meta($post_id,$id,$old);
+							// Old Value
+							$old=get_post_meta($post_id,$id,TRUE);
+							// New value
+							$new=isset($_POST[$id])?$_POST[$id]:FALSE;
+							// Save data
+							if($new && $new!=$old)
+								update_post_meta($post_id,$id,$new);
+							if(''==$new && $old)
+								delete_post_meta($post_id,$id,$old);
+						}
 					}
 				}
 			}
