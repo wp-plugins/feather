@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherMeta
-		@version 1.0
+		@version 1.0.2
 **/
 
 //! Add custom meta boxes
@@ -30,7 +30,7 @@ class FeatherMeta extends FeatherBase {
 		// Meta nonce
 		if(!isset(self::$nonce)) {
 			// Create nonce field
-			wp_nonce_field( plugin_basename( __FILE__ ),'bandit_meta_nonce');
+			wp_nonce_field( plugin_basename( __FILE__ ),'feather_meta_nonce');
 			// Prevent duplicate nonce fields
 			self::$nonce=TRUE;
 		}
@@ -77,10 +77,10 @@ class FeatherMeta extends FeatherBase {
 	private static function process_field(array $field,$post_id,$count=NULL) {
 		if(!isset($count)) {
 			// Set field id
-			$field['id']='_bandit_'.$field['id'];
+			$field['id']=$field['id'];
 		} else {
 			// Set field id
-			$field['id']='_bandit_'.$field['id'].$count;
+			$field['id']=$field['id'].$count;
 			// Set field label
 			$field['label']=$field['label'].' '.$count;
 		}
@@ -148,7 +148,7 @@ class FeatherMeta extends FeatherBase {
 		if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) 
 			return;
 		// Set nonce
-		$nonce=isset($_POST['bandit_meta_nonce'])?$_POST['bandit_meta_nonce']:'';
+		$nonce=isset($_POST['feather_meta_nonce'])?$_POST['feather_meta_nonce']:'';
 		// Verify nonce
 		if(!wp_verify_nonce($nonce,plugin_basename( __FILE__ ))) { return; }
 
@@ -168,9 +168,9 @@ class FeatherMeta extends FeatherBase {
 					for($i=1;$i<=$count;$i++) {
 						// Prefix field ID
 						if($count=='1')
-							$id='_bandit_'.$field['id'];
+							$id=$field['id'];
 						else
-							$id='_bandit_'.$field['id'].$i;
+							$id=$field['id'].$i;
 						// Old Value
 						$old=get_post_meta($post_id,$id,TRUE);
 						// New value

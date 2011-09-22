@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherAdmin
-		@version 1.0
+		@version 1.0.2
 **/
 
 class FeatherAdmin extends FeatherBase {
@@ -133,9 +133,9 @@ class FeatherAdmin extends FeatherBase {
 		// Stylesheets
 		add_action('admin_print_styles-settings_page_feather',
 			__CLASS__.'::stylesheets');
-		// Javascript
+		/* Javascript - future use
 		add_action('admin_print_scripts-settings_page_feather',
-			__CLASS__.'::javascript');
+			__CLASS__.'::javascript');*/
 	}
 
 	/**
@@ -145,7 +145,7 @@ class FeatherAdmin extends FeatherBase {
 	static function validate_settings($input) {
 		// Get tab
 		$tab=$input['tab'];
-		// Unset bandit_tab option
+		// Unset tab option
 		unset($input['tab']);
 		// Get current options
 		$valid=self::$option?self::$option:array();
@@ -302,7 +302,7 @@ class FeatherAdmin extends FeatherBase {
 		Process meta field
 			@public
 	**/
-	static function process_meta_field($id,array $fields) {
+	static function process_meta_field($mid,array $fields) {
 		// Extract fields
 		extract($fields);
 
