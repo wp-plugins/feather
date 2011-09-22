@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherBase
-		@version 1.0.2
+		@version 1.0.3
 **/
 
 //! Base structure
@@ -21,7 +21,7 @@ class FeatherBase {
 	//@{ Framework details
 	const
 		TEXT_Framework='Feather',
-		TEXT_Version='1.0.2';
+		TEXT_Version='1.0.3';
 	//@}
 
 	//@{ Locale-specific error/exception messages
@@ -368,6 +368,8 @@ class FeatherCore extends FeatherBase {
 		);
 		// Get feather option
 		self::$option=get_option('feather');
+		if(!self::$option)
+			self::set_default_options();
 		// Check for maintenance mode
 		if(!is_admin() && self::get_option('maintenance'))
 			if(!current_user_can('administrator'))
@@ -377,6 +379,15 @@ class FeatherCore extends FeatherBase {
 			self::load_theme_file('feather-theme','lib');
 		// Load configuration file
 		self::$config=FeatherConfig::theme('feather-config','config');
+	}
+
+	/**
+		Set default options
+			@private
+	**/
+	private static function set_default_options() {
+		self::$option=array('auto_feed_links'=>'0');
+		update_option('feather',self::$option);
 	}
 
 	/**
