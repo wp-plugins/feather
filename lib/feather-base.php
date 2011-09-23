@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherBase
-		@version 1.0.4
+		@version 1.0.5
 **/
 
 //! Base structure
@@ -21,7 +21,7 @@ class FeatherBase {
 	//@{ Framework details
 	const
 		TEXT_Framework='Feather',
-		TEXT_Version='1.0.4';
+		TEXT_Version='1.0.5';
 	//@}
 
 	//@{ Locale-specific error/exception messages

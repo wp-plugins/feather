@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherAdmin
-		@version 1.0.4
+		@version 1.0.5
 **/
 
 class FeatherAdmin extends FeatherBase {
@@ -26,6 +26,8 @@ class FeatherAdmin extends FeatherBase {
 		self::load_file('form','lib');
 		// Load settings library
 		self::load_file('settings','lib');
+		// Setting Notices
+		add_action('admin_notices',__CLASS__.'::setting_notices');
 		// Admin menu
 		add_action('admin_menu',__CLASS__.'::admin_menu');
 		// Admin init
@@ -42,6 +44,14 @@ class FeatherAdmin extends FeatherBase {
 				// Add action to save meta
 				add_action('save_post','FeatherMeta::save_meta');
 			}
+	}
+
+	/**
+		Setting notices
+			@public
+	**/
+	static function setting_notices() {
+		settings_errors('feather_setting_notices');
 	}
 
 	/**
@@ -220,6 +230,9 @@ class FeatherAdmin extends FeatherBase {
 				break;
 
 		}
+		// Settings saved notice
+		add_settings_error('feather_setting_notices',
+			esc_attr('settings_updated'),__('Settings saved.'),'updated');
 		return $valid;
 	}
 
