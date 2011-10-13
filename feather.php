@@ -3,7 +3,7 @@
 Plugin Name: Feather
 Plugin URI: http://wpbandit.com/feather/
 Description: Lightweight & Powerful Theme Framework
-Version: 1.0.5
+Version: 1.0.6
 Author: Jermaine Marée of WPBandit
 Author URI: http://wpbandit.com
 */

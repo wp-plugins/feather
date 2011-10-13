@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherBase
-		@version 1.0.5
+		@version 1.0.6
 **/
 
 //! Base structure
@@ -21,7 +21,7 @@ class FeatherBase {
 	//@{ Framework details
 	const
 		TEXT_Framework='Feather',
-		TEXT_Version='1.0.5';
+		TEXT_Version='1.0.6';
 	//@}
 
 	//@{ Locale-specific error/exception messages
@@ -370,6 +370,8 @@ class FeatherCore extends FeatherBase {
 		self::$option=get_option('feather');
 		if(!self::$option)
 			self::set_default_options();
+		// Upgrade check
+		self::upgrade_check();
 		// Check for maintenance mode
 		if(!is_admin() && self::get_option('maintenance'))
 			if(!current_user_can('administrator'))
@@ -379,6 +381,20 @@ class FeatherCore extends FeatherBase {
 			self::load_theme_file('feather-theme','lib');
 		// Load configuration file
 		self::$config=FeatherConfig::theme('feather-config','config');
+	}
+
+	/**
+		Upgrade check
+			@private
+	**/
+	private static function upgrade_check() {
+		// Theme Version
+		$version=self::get_option('version');
+		// Upgrade if necessary
+		if($version && ($version < self::TEXT_Version)) {
+			if(self::load_file('upgrade','lib'))
+				FeatherUpgrade::init(self::TEXT_Version);
+		}
 	}
 
 	/**
@@ -475,8 +491,10 @@ class FeatherCore extends FeatherBase {
 			add_theme_support('post-thumbnails');
 		// Image Sizes
 		if(self::get_config('IMAGE_SIZES'))
-			foreach(self::$config['IMAGE_SIZES'] as $name=>$image)
-				add_image_size($name,$image['width'],$image['height']);
+			foreach(self::$config['IMAGE_SIZES'] as $name=>$image) {
+				if(!isset($image['crop'])) { $image['crop']=FALSE; }
+				add_image_size($name,$image['width'],$image['height'],$image['crop']);
+			}
 		// Register theme taxonomies
 		if(self::$theme_taxonomy) {
 			foreach(self::$theme_taxonomy as $name=>$taxonomy) {
