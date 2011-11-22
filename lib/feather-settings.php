@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherSettings
-		@version 1.0.1
+		@version 1.1
 **/
 
 //! Settings Class
@@ -127,6 +127,17 @@ class FeatherSettings extends FeatherBase {
 				$output.=FeatherForm::checkbox($attrs,$value);
 				$output.=' '.$label.'</label><br />';
 			}
+		}
+
+		// Colorpicker
+		if('colorpicker'==$type) {
+			// Get value
+			$value=call_user_func_array($optionfunc,array($id));
+			$bg=$value?$value:'ccc';
+			// Text Field
+			$output='<div class="feather-colorpicker"><div style="background-color: #'.$bg.';"></div></div>';
+			$output.='<input id="'.$attrs['name'].'" type="text" name="'.$attrs['name'].'" '.
+				'class="small-text" value="'.esc_attr($value).'" maxlength="6" />';
 		}
 
 		// Image

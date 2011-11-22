@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: Feather
-Plugin URI: http://wpbandit.com/feather/
+Plugin Name: Feather (BETA)
+Plugin URI: http://banditmedia.github.com/feather/
 Description: Lightweight & Powerful Theme Framework
-Version: 1.0.6
+Version: 1.1b
 Author: Jermaine Marée of WPBandit
 Author URI: http://wpbandit.com
 */

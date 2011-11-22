@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherForm
-		@version 1.0.6
+		@version 1.1
 **/
 
 //! Upgrade Feather
@@ -24,18 +24,18 @@ class FeatherUpgrade extends FeatherBase {
 	**/
 	static function init($version) {
 		switch($version) {
-			case '1.0.6':
-				self::upgrade_106();
+			case '1.1':
+				self::upgrade_11();
 				break;
 		}
 	}
 
 	/**
-		Upgrade to 1.0.6
+		Upgrade to 1.1
 			@private
 	**/
-	private static function upgrade_106() {
-		self::$option['version']='1.0.6';
+	private static function upgrade_11() {
+		self::$option['version']='1.1';
 		update_option('feather',self::$option);
 	}
 

@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherAdmin
-		@version 1.0.5
+		@version 1.1
 **/
 
 class FeatherAdmin extends FeatherBase {
@@ -149,9 +149,9 @@ class FeatherAdmin extends FeatherBase {
 		// Stylesheets
 		add_action('admin_print_styles-settings_page_feather',
 			__CLASS__.'::stylesheets');
-		/* Javascript - future use
+		// Javascript
 		add_action('admin_print_scripts-settings_page_feather',
-			__CLASS__.'::javascript');*/
+			__CLASS__.'::javascript');
 	}
 
 	/**
@@ -207,6 +207,21 @@ class FeatherAdmin extends FeatherBase {
 						$valid[$option]=isset($input[$option])?'1':'0';
 					}
 				}
+				break;
+
+			// Login Tab
+			case 'login':
+				// Login Custom
+				$valid['login_custom']=isset($input['login_custom'])?'1':'0';
+				// Logo
+				$valid['login_logo']=isset($input['login_logo'])?esc_url($input['login_logo']):'';
+				$valid['login_logo_url']=isset($input['login_logo_url'])?esc_url($input['login_logo_url']):'';
+				// Colors
+				$valid['login_bg_color']=isset($input['login_bg_color'])?esc_attr($input['login_bg_color']):'';
+				$valid['login_link_color']=isset($input['login_link_color'])?esc_attr($input['login_link_color']):'';
+				$valid['login_link_color_hover']=isset($input['login_link_color_hover'])?esc_attr($input['login_link_color_hover']):'';
+				// CSS
+				$valid ['login_css']=isset($input['login_css'])?esc_attr($input['login_css']):'';
 				break;
 
 			// Advanced Tab
@@ -289,6 +304,13 @@ class FeatherAdmin extends FeatherBase {
 	static function stylesheets() {
 		wp_enqueue_style('feather-admin-css',
 			FEATHER_URL.'assets/css/feather-admin.css',FALSE,20110915);
+		// Load tab specific styles
+		if('login'==FeatherAdmin::get_current_options_page_tab('feather')) {
+			wp_enqueue_style('thickbox');
+			wp_enqueue_style('feather-colorpicker',
+				FEATHER_URL.'assets/css/colorpicker.css',FALSE,20110915);
+		}
+			
 	}
 
 	/**
@@ -296,8 +318,14 @@ class FeatherAdmin extends FeatherBase {
 			@public
 	**/
 	static function javascript() {
-		wp_enqueue_script('feather-admin-js',
-			FEATHER_URL.'assets/js/feather-admin.js',FALSE,20110915);
+		// Register scripts
+		wp_register_script('feather-colorpicker',FEATHER_URL.'assets/js/colorpicker.js',
+			array('jquery'),20111120);
+		wp_register_script('feather-admin-login',FEATHER_URL.'assets/js/feather-admin-login.js',
+			array('media-upload','thickbox','jquery','feather-colorpicker'),20111120);
+		// Load tab specific scripts
+		if('login'==FeatherAdmin::get_current_options_page_tab('feather'))
+			wp_enqueue_script('feather-admin-login');
 	}
 
 }

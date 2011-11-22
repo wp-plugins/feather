@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherBase
-		@version 1.0.6
+		@version 1.1
 **/
 
 //! Base structure
@@ -21,7 +21,7 @@ class FeatherBase {
 	//@{ Framework details
 	const
 		TEXT_Framework='Feather',
-		TEXT_Version='1.0.6';
+		TEXT_Version='1.1';
 	//@}
 
 	//@{ Locale-specific error/exception messages
@@ -256,6 +256,9 @@ class FeatherCore extends FeatherBase {
 		self::configure_theme();
 		// Init admin
 		if(is_admin()) { self::init_admin(); }
+		// Custom login page
+		if(self::$vars['PAGENOW']=='wp-login.php')
+			self::login_custom();
 		// Theme initialization
 		if(method_exists('FeatherTheme','init'))
 			FeatherTheme::init();
@@ -269,11 +272,14 @@ class FeatherCore extends FeatherBase {
 		if(defined('WP_DEBUG') && E_USER_ERROR!=$code)
 			return FALSE;
 		if(E_USER_ERROR==$code) {
-			// Store error message
-			self::$vars['ERROR']=$msg;
-			// Load error template
-			self::load_file('error','tmpl');
-			exit(1);
+			$exclude=array('wp-login.php','wp-register.php');
+			if(!in_array(self::$vars['PAGENOW'],$exclude)) {
+				// Store error message
+				self::$vars['ERROR']=$msg;
+				// Load error template
+				self::load_file('error','tmpl');
+				exit(1);
+			}
 		}
 		return TRUE;
 	}
@@ -286,10 +292,16 @@ class FeatherCore extends FeatherBase {
 		// Exclude login,register pages
 		$exclude=array('wp-login.php','wp-register.php');
 		if(!in_array(self::$vars['PAGENOW'],$exclude)) {
-			$url=substr($_SERVER['REQUEST_URI'],-12);
+			// Get URL based on permalinks
+			if(self::$vars['PERMALINKS']) {
+				$url=substr($_SERVER['REQUEST_URI'],-12);
+				$redirect_url=home_url().'/_maintenance';
+			} else {
+				$url=isset($_REQUEST['p'])?esc_attr($_REQUEST['p']):'';
+				$redirect_url=home_url().'/?p=_maintenance';
+			}
 			// Redirect if not maintenance URL
 			if('_maintenance'!=$url) {
-				$redirect_url=home_url().'/_maintenance';
 				header('Location: '.$redirect_url,TRUE,307);
 				exit;
 			}
@@ -342,6 +354,7 @@ class FeatherCore extends FeatherBase {
 			'TABS'=>array(
 				'general'=>'General',
 				'sidebar'=>'Sidebar',
+				'login'=>'Login',
 				'advanced'=>'Advanced'
 			),
 			// Framework version
@@ -366,6 +379,8 @@ class FeatherCore extends FeatherBase {
 				'widget_wp_text'=>'WP_Widget_Text'
 			)
 		);
+		// Permalinks status
+		self::$vars['PERMALINKS']=(get_option('permalink_structure')!='')?TRUE:FALSE;
 		// Get feather option
 		self::$option=get_option('feather');
 		if(!self::$option)
@@ -388,7 +403,7 @@ class FeatherCore extends FeatherBase {
 			@private
 	**/
 	private static function upgrade_check() {
-		// Theme Version
+		// Framework Version
 		$version=self::get_option('version');
 		// Upgrade if necessary
 		if($version && ($version < self::TEXT_Version)) {
@@ -457,6 +472,16 @@ class FeatherCore extends FeatherBase {
 			@private
 	**/
 	private static function configure_theme() {
+		// Theme modules
+		if(self::get_config('MODULES')) {
+			foreach(self::$config['MODULES'] as $file=>$class) {
+				$moddir='modules';
+				if(is_file(FEATHER_PATH_THEME.'modules/'.$file.'/'.$file.'.php'))
+					$moddir='modules/'.$file;
+				if(self::load_theme_file($file,$moddir))
+					call_user_func(array($class,'init'));
+			}
+		}
 		// Get theme options
 		if(self::get_config('OPTION_NAME'))
 			self::$theme_option=get_option(self::$config['OPTION_NAME']);
@@ -467,13 +492,6 @@ class FeatherCore extends FeatherBase {
 			self::$theme_taxonomy=FeatherConfig::theme('config-taxonomy','tax');
 		if(self::get_config('CUSTOM_TYPE'))
 			self::$theme_type=FeatherConfig::theme('config-type','type');
-		// Theme modules
-		if(self::get_config('MODULES')) {
-			foreach(self::$config['MODULES'] as $file=>$class) {
-				if(self::load_theme_file($file,'modules'))
-					call_user_func(array($class,'init'));
-			}
-		}
 		// Menu Locations
 		if(self::get_config('MENUS'))
 			register_nav_menus(self::$config['MENUS']);
@@ -512,8 +530,28 @@ class FeatherCore extends FeatherBase {
 
 		// Non-admin configuration
 		if(!is_admin()) {
+			// Register scripts
+			if(self::get_config('SCRIPTS'))
+				add_action('template_redirect',__CLASS__.'::register_scripts');
 			// Add action for theme head
 			add_action('template_redirect',__CLASS__.'::theme_head');
+		}
+	}
+
+	/**
+		Register scripts
+			@public
+	**/
+	static function register_scripts() {
+		foreach(self::$config['SCRIPTS'] as $key=>$params) {
+			// Dependencies
+			$deps=isset($params['deps'])?$params['deps']:FALSE;
+			// Version
+			$ver=isset($params['ver'])?$params['ver']:'1.0';
+			// Place in footer?
+			$footer=isset($params['footer'])?$params['footer']:FALSE;
+			// Register script
+			wp_register_script($key,$params['src'],$deps,$ver,$footer);
 		}
 	}
 
@@ -561,6 +599,74 @@ class FeatherCore extends FeatherBase {
 		add_action('admin_notices',__CLASS__.'::admin_notices');
 		// Load admin library, init framework admin
 		if(self::load_file('admin','lib')) { FeatherAdmin::init(); }
+	}
+
+	/**
+		Custom login page
+			@private
+	**/
+	private static function login_custom() {
+		// Custom login page?
+		if(self::get_option('login_custom')) {
+			// Login Head
+			add_action('login_head',__CLASS__.'::login_head');
+			// Logo URL
+			if(self::get_option('login_logo_url'))
+				add_filter('login_headerurl',__CLASS__.'::login_headerurl');
+		}
+	}
+
+	/**
+		Login Logo URL
+			@public
+	**/
+	static function login_headerurl($url) {
+		return self::get_option('login_logo_url');
+	}
+
+	/**
+		Login Head
+			@public
+	**/
+	static function login_head() {
+		// Get options
+		$logo=self::get_option('login_logo');
+		$bg_color=self::get_option('login_bg_color');
+		$link_color=self::get_option('login_link_color');
+		$link_color_hover=self::get_option('login_link_color_hover');
+		$login_css=self::get_option('login_css');
+		// Build CSS
+		$output='<style type="text/css">';
+		// Background
+		if($bg_color) {
+			$output.='html { background-color: #'.$bg_color.'!important; }';
+			$output.='#nav, #backtoblog { text-shadow: none }';
+		}
+		// Logo
+		if($logo) {
+			// Get image size
+			$size = getimagesize($logo);
+			// Set width and height
+			$width = $size?'width:'.$size[0].'px;':'';
+			$height = $size?'height:'.$size[1].'px':'';
+			// Logo CSS
+			$output.=' h1 a { background:url('.$logo.') no-repeat; '.$width.$height.' }';
+		}
+		// Link Color
+		if($link_color) {
+			$output.='.login #nav a, .login #backtoblog a { color:#'.$link_color.'!important; }';
+		}
+		// Link Color Hover
+		if($link_color_hover) {
+			$output.='.login #nav a:hover, .login #backtoblog a:hover { color:#'.$link_color_hover.'!important; }';
+		}
+		// Custom CSS
+		if($login_css) {
+			$output.=$login_css;
+		}
+		$output.='</style>';
+		// Print CSS
+		echo $output;
 	}
 
 	/**

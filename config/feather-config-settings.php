@@ -127,6 +127,84 @@ $setting['disable_wp_widgets']=array(
 
 
 /*---------------------------------------------------------------------------*
+ * Login Tab
+ *---------------------------------------------------------------------------*/
+
+/* ---- Enable ------------------------------------------------------------- */
+$setting['login']=array(
+	'title'=>'Custom Login Page',
+	'desc'=>'',
+	'tab'=>'login',
+	'fields'=>array(
+		'login_custom'=>array(
+			'label'=>'Enable',
+			'type'=>'checkbox',
+			'choices'=>array(
+				'login_custom'=>'Enable custom login page'
+			)
+		),
+	)
+);
+
+/* ---- Logo --------------------------------------------------------------- */
+
+$setting['customlogo']=array(
+	'title'=>'Logo',
+	'desc'=>'Use a custom logo by uploading an image or selecting an existing '.
+		'image from the Media Library.',
+	'tab'=>'login',
+	'fields'=>array(
+		'login_logo'=>array(
+			'label'=>'Logo Image',
+			'type'=>'image'
+		),
+		'login_logo_url'=>array(
+			'label'=>'Logo URL',
+			'type'=>'text',
+			'class'=>'regular-text'
+		)
+	)
+);
+
+/* ---- Background --------------------------------------------------------- */
+
+$setting['background']=array(
+	'title'=>'Colors',
+	'desc'=>'',
+	'tab'=>'login',
+	'fields'=>array(
+		'login_bg_color'=>array(
+			'label'=>'Background Color',
+			'type'=>'colorpicker'
+		),
+		'login_link_color'=>array(
+			'label'=>'Link Color',
+			'type'=>'colorpicker'
+		),
+		'login_link_color_hover'=>array(
+			'label'=>'Link Color Hover',
+			'type'=>'colorpicker'
+		)
+	)
+);
+
+/* ---- CSS ---------------------------------------------------------------- */
+
+$setting['logincss']=array(
+	'title'=>'Custom CSS',
+	'desc'=>'',
+	'tab'=>'login',
+	'fields'=>array(
+		'login_css'=>array(
+			'label'=>'CSS',
+			'type'=>'textarea',
+			'rows'=>'24'
+		)
+	)
+);
+
+
+/*---------------------------------------------------------------------------*
  * Advanced Tab
  *---------------------------------------------------------------------------*/
 

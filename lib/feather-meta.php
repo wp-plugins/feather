@@ -12,7 +12,7 @@
 	Jermaine Marée
 
 		@package FeatherMeta
-		@version 1.0.4
+		@version 1.1
 **/
 
 //! Add custom meta boxes
@@ -178,6 +178,8 @@ class FeatherMeta extends FeatherBase {
 	private static function create_field(array $field) {
 		// Extract args
 		extract($field);
+		// Data validation
+		$value=esc_attr($value);
 		// Begin table row
 		$output='<tr>'."\n";
 		$output.='<th><label for="'.$id.'">'.$label.'</label></th>'."\n";
@@ -250,7 +252,7 @@ class FeatherMeta extends FeatherBase {
 							$new=isset($_POST[$id])?$_POST[$id]:FALSE;
 							// Save data
 							if($new && $new!=$old)
-								update_post_meta($post_id,$id,$new);
+								update_post_meta($post_id,$id,wp_filter_post_kses($new));
 							if(''==$new && $old)
 								delete_post_meta($post_id,$id,$old);
 						}
@@ -268,7 +270,7 @@ class FeatherMeta extends FeatherBase {
 							$new=isset($_POST[$id])?$_POST[$id]:FALSE;
 							// Save data
 							if($new && $new!=$old)
-								update_post_meta($post_id,$id,$new);
+								update_post_meta($post_id,$id,wp_filter_post_kses($new));
 							if(''==$new && $old)
 								delete_post_meta($post_id,$id,$old);
 						}

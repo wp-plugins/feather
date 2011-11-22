@@ -29,7 +29,6 @@ File: feather-admin.css
   margin-top: 14px;
   padding: 8px 0;
 }
-
 .feather h3:hover {
   color: #464646;
   cursor: default;
@@ -39,16 +38,39 @@ File: feather-admin.css
 /* -- Image Placeholder -------------------------------- */
 
 .feather_image_placeholder {
-  margin-top: 20px;
   width: 544px;
 }
-
 .feather_image_placeholder img {
-  border: 3px dashed #ccc;
+  border: 2px dashed #ccc;
   height: 40px;
+  margin-top: 10px;
+  padding: 4px;
   max-width: 544px;
   width: auto;
 }
+
+
+/* -- Colorpicker  ------------------------------------- */
+
+.feather-colorpicker {
+  background: url(../images/colorpicker/select.png);
+  float: left;
+  position: relative;
+  margin-top: -5px;
+  margin-right: 10px;
+  width: 36px;
+  height: 36px;
+}
+.feather-colorpicker div {
+  background: url(../images/colorpicker/select.png) center;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 30px;
+  height: 30px;
+}
+.colorpicker input { line-height: 10px; top:5px }
+
 
 /* -- Credit ------------------------------------------- */
 
@@ -58,6 +80,5 @@ File: feather-admin.css
   bottom: 18px;
   right: 30px;
 }
-
 p#wpbandit, p#wpbandit a { color: #aaa; }
 p#wpbandit a:hover { color: #888; }
