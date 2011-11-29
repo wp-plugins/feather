@@ -3,7 +3,7 @@ Contributors: jermainemaree
 Tags: framework, theme framework
 Requires at least: 3.1
 Tested up to: 3.2.1
-Stable tag: 1.1
+Stable tag: 1.2
 
 Feather is a lightweight and powerful WordPress theme framework. Easily configure your theme using a configuration file.
 
@@ -29,11 +29,11 @@ To quickly get going follow the instructions below:
 
 == Changelog ==
 
-= 1.2 - (coming soon)
+= 1.2 - 2011.11.28 =
 * Restructured framework core and libraries
 * Updated login module styles for WP 3.3
 
-= 1.1 - 2011.11.22
+= 1.1 - 2011.11.22 =
 * Added config option to register scripts
 * Fix bug when feather-config.php is missing
 * Ability to load modules from folder
