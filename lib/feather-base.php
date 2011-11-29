@@ -1,7 +1,7 @@
 <?php
 
 /**
-	Feather Theme Framework
+	Feather WordPress Theme Framework
 
 	The contents of this file are subject to the terms of the GNU General
 	Public License Version 2.0. You may not use this file except in
@@ -9,10 +9,10 @@
 	can be waived if you get permission from the copyright holder.
 
 	Copyright (c) 2011 Bandit Media
-	Jermaine Marée
+	Jermaine Maree
 
 		@package FeatherBase
-		@version 1.1
+		@version 1.2
 **/
 
 //! Base structure
@@ -21,7 +21,7 @@ class FeatherBase {
 	//@{ Framework details
 	const
 		TEXT_Framework='Feather',
-		TEXT_Version='1.1';
+		TEXT_Version='1.2';
 	//@}
 
 	//@{ Locale-specific error/exception messages
@@ -37,145 +37,71 @@ class FeatherBase {
 		$vars,
 		//! Framework prefix
 		$prefix='feather',
-		//! Framework Configuration
+		//! Configuration
 		$config,
 		//! Framework Settings
 		$setting,
-		//! Framework Options
+		//! Options
 		$option,
+		//! Notices
+		$notices;
+
+	//! *** Deprecated Variables ***
+	protected static
+		//! Theme options
+		$theme_option,
 		//! Theme settings
 		$theme_setting,
-		//! Theme options,
-		$theme_option,
 		//! Theme meta
-		$theme_meta,
-		//! Theme taxonomy
-		$theme_taxonomy,
-		//! Theme post type
-		$theme_type;
+		$theme_meta;
 
 	/**
-		Get configuration option
-			@param $option string
+		Compiles an array of HTML attributes into an attribute string
+			@return string
+			@param $attrs array
 			@protected
 	**/
-	protected static function get_config($option=NULL) {
-		$result=isset(self::$config[$option])?self::$config[$option]:FALSE;
-		return $result;
+	protected static function attributes(array $attrs) {
+		if(!empty($attrs)) {
+			$result='';
+			foreach($attrs as $key=>$val)
+				$result.=' '.$key.'="'.$val.'"';
+			return $result;
+		}
+	}
+	/**
+		Get configuration option
+			@param $key string
+			@protected
+	**/
+	protected static function get_config($key) {
+		$value = isset(self::$config[$key])?self::$config[$key]:FALSE;
+		return $value;
 	}
 
 	/**
 		Get framework option
-			@param $name string
+			return mixed
+			@param $key string
 			@public
 	**/
-	static function get_option($name=NULL) {
-		$result=isset(self::$option[$name])?self::$option[$name]:FALSE;
-		return $result;
+	static function get_option($key) {
+		$value = isset(self::$option[$key])?self::$option[$key]:FALSE;
+		return $value;
 	}
 
 	/**
-		Get theme option
-			@param $name string
-			@public
-	**/
-	static function get_theme_option($name=NULL) {
-		$result=isset(self::$theme_option[$name])?self::$theme_option[$name]:FALSE;
-		return $result;
-	}
-
-	/**
-		Get lang option
-			@param $name string
-			@public
-	**/
-	static function get_theme_lang($name=NULL) {
-		$result=isset(self::$theme_lang[$name])?self::$theme_lang[$name]:FALSE;
-		return $result;
-	}
-
-	/**
-		Load framework file
-			@param $name string
-			@param $dir string
+		Add notice
+			@param $message string
+			@param $class string
 			@protected
 	**/
-	protected static function load_file($filename=NULL,$dir='') {
-		$file=FEATHER_PATH.$dir.'/'.self::$prefix.'-'.$filename.'.php';
-		return self::file_exists($file);
-	}
-
-	/**
-		Load theme file
-			@param $name string
-			@param $dir string
-			@protected
-	**/
-	protected static function load_theme_file($name=NULL,$dir='') {
-		$file=FEATHER_PATH_THEME.$dir.'/'.$name.'.php';
-		return self::file_exists($file);
-	}
-
-	/**
-		Load theme widget
-			@param $name string
-			@protected
-	**/
-	protected static function load_theme_widget($name=NULL) {
-		$file=get_template_directory().'/widgets/'.$name.'.php';
-		return self::file_exists($file);
-	}
-
-	/**
-		Check if file exists
-			@param $file string
-			@param $config boolean
-			@protected
-	**/
-	protected static function file_exists($file=NULL,$config=FALSE) {
-		// Set error
-		$error=$config?self::TEXT_Config:self::TEXT_File;
-		if(!is_file($file)) {
-			// File does not exist, set error message
-			$message=sprintf($error,basename($file));
-			if(!is_admin())
-				trigger_error($message,E_USER_ERROR);
-			else
-				self::$vars['ERROR']=$message;
-			return FALSE;
-		}
-		// Load file
-		if(!$config)
-			require($file);
-		return TRUE;
-	}
-
-	/**
-		Intercept calls to undefined methods
-			@param $func string
-			@param $args array
-			@public
-	**/
-	function __call($func,array $args) {
-		$message=sprintf(self::TEXT_Method,get_called_class().'::'.$func);
-		if(!headers_sent())
-			trigger_error($message,E_USER_ERROR);
-		else
-			trigger_error($message);
-	}
-
-	/**
-		Intercept calls to undefined static methods
-			@param $func string
-			@param $args array
-			@public
-	**/
-	static function __callStatic($func,array $args) {
-		$message=sprintf(self::TEXT_Method,get_called_class().'::'.$func);
-		if(!headers_sent())
-			trigger_error($message,E_USER_ERROR);
-		else
-			trigger_error($message);
+	protected static function add_notice($message,$class='updated') {
+		if(!self::$notices) { self::$notices = array(); }
+		self::$notices[] = array(
+			'class'		=> $class,
+			'message'	=> $message
+		);
 	}
 
 	/**
@@ -190,29 +116,72 @@ class FeatherBase {
 	**/
 	private function __clone() {}
 
+	/* DEPRECATED FUNCTIONS
+	/*-----------------------------------------------------------------------*/
+
+	/**
+		Get theme option
+			@param $name string
+			@public
+	**/
+	static function get_theme_option($name=NULL) {
+		$result=isset(self::$theme_option[$name])?self::$theme_option[$name]:FALSE;
+		return $result;
+	}
+
+	/**
+		Load theme file
+			@param $name string
+			@param $dir string
+			@protected
+	**/
+	protected static function load_theme_file($name=NULL,$dir='') {
+		$file = FEATHER_PATH_THEME.$dir.'/'.$name.'.php';
+		if(is_file($file)) {
+			require($file);
+			return TRUE;
+		}
+	}
+
+	/* END DEPRECATED FUNCTIONS
+	/*-----------------------------------------------------------------------*/
+
 }
 
 //! Config file loader
 class FeatherConfig extends FeatherBase {
 
 	/**
-		Framework config file
+		Load configuration file
+			@return array
 			@param $name string
-			@protected
+			@param $var string
+			$param $_internal bool
+			@public
 	**/
-	static function framework($name=NULL,$var=NULL) {
-		// File path
-		$file=FEATHER_PATH.'config/'.self::$prefix.'-config-'.$name.'.php';
-		if(!self::file_exists($file,TRUE)) {
-			return FALSE;
-		} else {
-			ob_start();
-			require($file);
-			ob_end_clean();
+	static function load($name,$var,$_internal=FALSE) {
+		// Theme
+		if(!$_internal) {
+			if(is_file(FEATHER_THEME_PATH.'config/config-'.$name.'.php')) {
+				ob_start();
+				require(FEATHER_THEME_PATH.'config/config-'.$name.'.php');
+				ob_end_clean();
+			}
 		}
-		// Return config
+		// Internal
+		if($_internal) {
+			if(is_file(FEATHER_PATH.'config/feather-config-'.$name.'.php')) {
+				ob_start();
+				require(FEATHER_PATH.'config/feather-config-'.$name.'.php');
+				ob_end_clean();
+			}
+		}
+		// Return variable
 		return isset($$var)?$$var:FALSE;
 	}
+
+	/* DEPRECATED FUNCTIONS
+	/*-----------------------------------------------------------------------*/
 
 	/**
 		Theme config file
@@ -221,8 +190,8 @@ class FeatherConfig extends FeatherBase {
 	**/
 	static function theme($name=NULL,$var=NULL) {
 		// File path
-		$file=FEATHER_PATH_THEME.'config/'.$name.'.php';
-		if(!self::file_exists($file,TRUE)) {
+		$file = FEATHER_PATH_THEME.'config/'.$name.'.php';
+		if(!is_file($file)) {
 			return FALSE;
 		} else {
 			ob_start();
@@ -232,6 +201,9 @@ class FeatherConfig extends FeatherBase {
 		// Return config
 		return isset($$var)?$$var:FALSE;
 	}
+
+	/* END DEPRECATED FUNCTIONS
+	/*-----------------------------------------------------------------------*/
 
 }
 
@@ -248,83 +220,31 @@ class FeatherCore extends FeatherBase {
 			return;
 		// Initialize framework
 		self::init();
-		// Register sidebars
-		self::register_sidebars();
-		// Initialize widgets
-		self::widgets_init();
-		// Configure theme
-		self::configure_theme();
-		// Init admin
-		if(is_admin()) { self::init_admin(); }
-		// Custom login page
-		if(self::$vars['PAGENOW']=='wp-login.php')
-			self::login_custom();
+		// Modules
+		self::modules();
+		// Taxonomies
+		self::taxonomies();
+		// Post types
+		self::post_types();
+		// Menus
+		self::menus();
+		// Sidebars
+		self::sidebars();
+		// Widgets
+		self::widgets();
+		// Theme features
+		add_action('after_setup_theme',__CLASS__.'::theme_features');
+		// Register scripts
+		add_action('wp_enqueue_scripts',__CLASS__.'::register_scripts');
+		// Boot admin
+		if(is_admin()) {
+			require(FEATHER_PATH.'lib/feather-admin.php');
+			FeatherAdmin::boot();
+		}
 		// Theme initialization
-		if(method_exists('FeatherTheme','init'))
+		if(method_exists('FeatherTheme','init')) {
 			FeatherTheme::init();
-	}
-
-	/**
-		Error template
-			@public
-	**/
-	static function error($code,$msg,$file,$line) {
-		if(defined('WP_DEBUG') && E_USER_ERROR!=$code)
-			return FALSE;
-		if(E_USER_ERROR==$code) {
-			$exclude=array('wp-login.php','wp-register.php');
-			if(!in_array(self::$vars['PAGENOW'],$exclude)) {
-				// Store error message
-				self::$vars['ERROR']=$msg;
-				// Load error template
-				self::load_file('error','tmpl');
-				exit(1);
-			}
 		}
-		return TRUE;
-	}
-
-	/**
-		Maintenance Mode
-			@public
-	**/
-	private static function maintenance() {
-		// Exclude login,register pages
-		$exclude=array('wp-login.php','wp-register.php');
-		if(!in_array(self::$vars['PAGENOW'],$exclude)) {
-			// Get URL based on permalinks
-			if(self::$vars['PERMALINKS']) {
-				$url=substr($_SERVER['REQUEST_URI'],-12);
-				$redirect_url=home_url().'/_maintenance';
-			} else {
-				$url=isset($_REQUEST['p'])?esc_attr($_REQUEST['p']):'';
-				$redirect_url=home_url().'/?p=_maintenance';
-			}
-			// Redirect if not maintenance URL
-			if('_maintenance'!=$url) {
-				header('Location: '.$redirect_url,TRUE,307);
-				exit;
-			}
-			// Load maintenance tempalte
-			self::load_file('maintenance','tmpl');
-			if(!isset(self::$vars['ERROR']))
-				exit(1);
-		}
-	}
-
-	/**
-		Return runtime performance analytics
-			@return array
-			@public
-	**/
-	static function profile() {
-		$stats=&self::$vars['STATS'];
-		// Compute elapsed time
-		$stats['TIME']['elapsed']=microtime(TRUE)-$stats['TIME']['start'];
-		// Compute memory consumption
-		$stats['MEMORY']['current']=memory_get_usage();
-		$stats['MEMORY']['peak']=memory_get_peak_usage();
-		return $stats;
 	}
 
 	/**
@@ -332,109 +252,177 @@ class FeatherCore extends FeatherBase {
 			@private
 	**/
 	private static function init() {
-		// Error handler
-		if(!is_admin())
-			set_error_handler(__CLASS__.'::error');
 		// Global $pagenow variable
 		global $pagenow;
+		// Permalinks
+		$permalinks = get_option('permalink_structure');
 		// Hydrate framework variables
 		self::$vars=array(
-			// Last error
-			'ERROR'=>NULL,
-			// Framework notice
-			'NOTICE'=>NULL,
 			// Global $pagenow variable
-			'PAGENOW'=>$pagenow,
-			// Profiler statistics
-			'STATS'=>array(
-				'MEMORY'=>array('start'=>memory_get_usage()),
-				'TIME'=>array('start'=>microtime(TRUE))
+			'PAGENOW' => $pagenow,
+			// Permalinks
+			'PERMALINKS' => ($permalinks && ($permalinks != ''))?TRUE:FALSE,
+			// Version
+			'VERSION' => self::TEXT_Framework.' '.self::TEXT_Version,
+			// Options Page Tabs
+			'TABS' => array(
+				'general'	=> __('General','feather'),
+				'sidebar'	=> __('Sidebar','feather'),
+				'login'		=> __('Login','feather'),
+				'advanced'	=> __('Advanced','feather')
 			),
-			// Framework settings tabs
-			'TABS'=>array(
-				'general'=>'General',
-				'sidebar'=>'Sidebar',
-				'login'=>'Login',
-				'advanced'=>'Advanced'
-			),
-			// Framework version
-			'VERSION'=>self::TEXT_Framework.' '.self::TEXT_Version,
-			// Post formats
-			'WP_POST_FORMATS'=>'aside|audio|chat|gallery|image|link|'.
+			// WP Version
+			'WP_VERSION'	=> get_bloginfo('version'),
+			// WP Post Formats
+			'WP_POSTFORMATS'=>'aside|audio|chat|gallery|image|link|'.
 				'quote|status|video',
 			// Default WP Widgets
-			'WP_WIDGETS'=>array(
-				'widget_wp_archives'=>'WP_Widget_Archives',
-				'widget_wp_calendar'=>'WP_Widget_Calendar',
-				'widget_wp_categories'=>'WP_Widget_Categories',
-				'widget_wp_custom_menu'=>'WP_Nav_Menu_Widget',
-				'widget_wp_links'=>'WP_Widget_Links',
-				'widget_wp_meta'=>'WP_Widget_Meta',
-				'widget_wp_pages'=>'WP_Widget_Pages',
-				'widget_wp_recent_comments'=>'WP_Widget_Recent_Comments',
-				'widget_wp_recent_posts'=>'WP_Widget_Recent_Posts',
-				'widget_wp_rss'=>'WP_Widget_RSS',
-				'widget_wp_search'=>'WP_Widget_Search',
-				'widget_wp_tag_cloud'=>'WP_Widget_Tag_Cloud',
-				'widget_wp_text'=>'WP_Widget_Text'
+			'WP_WIDGETS' => array(
+				'widget_wp_archives'		=> 'WP_Widget_Archives',
+				'widget_wp_calendar'		=> 'WP_Widget_Calendar',
+				'widget_wp_categories'		=> 'WP_Widget_Categories',
+				'widget_wp_custom_menu'		=> 'WP_Nav_Menu_Widget',
+				'widget_wp_links'			=> 'WP_Widget_Links',
+				'widget_wp_meta'			=> 'WP_Widget_Meta',
+				'widget_wp_pages'			=> 'WP_Widget_Pages',
+				'widget_wp_recent_comments'	=> 'WP_Widget_Recent_Comments',
+				'widget_wp_recent_posts'	=> 'WP_Widget_Recent_Posts',
+				'widget_wp_rss'				=> 'WP_Widget_RSS',
+				'widget_wp_search'			=> 'WP_Widget_Search',
+				'widget_wp_tag_cloud'		=> 'WP_Widget_Tag_Cloud',
+				'widget_wp_text'			=> 'WP_Widget_Text'
 			)
 		);
-		// Permalinks status
-		self::$vars['PERMALINKS']=(get_option('permalink_structure')!='')?TRUE:FALSE;
 		// Get feather option
-		self::$option=get_option('feather');
-		if(!self::$option)
-			self::set_default_options();
-		// Upgrade check
-		self::upgrade_check();
-		// Check for maintenance mode
-		if(!is_admin() && self::get_option('maintenance'))
-			if(!current_user_can('administrator'))
-				self::maintenance();
+		self::$option = get_option('feather');
+		// If no options, set defaults
+		if(!self::$option || !is_array(self::$option)) {
+			self::$option = array('version' => self::TEXT_Version);
+			update_option('feather',self::$option);
+		}
+		// Upgrade, if necessary
+		self::upgrade();
+		// Custom login page
+		self::login();
+		// Maintenance page
+		self::maintenance();
 		// Load theme library
-		if(is_file(FEATHER_PATH_THEME.'lib/feather-theme.php'))
-			self::load_theme_file('feather-theme','lib');
+		if(is_file(FEATHER_THEME_PATH.'lib/feather-theme.php')) {
+			require(FEATHER_THEME_PATH.'lib/feather-theme.php');
+		}
 		// Load configuration file
-		self::$config=FeatherConfig::theme('feather-config','config');
+		if(is_file(FEATHER_THEME_PATH.'config/feather-config.php')) {
+			// Deprecated version of framework
+			self::$vars['DEPRECATED'] = TRUE;
+			// Load config file
+			ob_start();
+			require(FEATHER_THEME_PATH.'config/feather-config.php');
+			ob_end_clean();
+			// Set $config variable
+			self::$config = isset($config)?$config:FALSE;
+			if(self::get_config('OPTION_NAME')) {
+				self::$theme_option=get_option(self::$config['OPTION_NAME']);
+			}
+		} else {
+			self::$config = FeatherConfig::load('feather','config');
+		}
+		
 	}
 
 	/**
-		Upgrade check
+		Upgrade
 			@private
 	**/
-	private static function upgrade_check() {
-		// Framework Version
-		$version=self::get_option('version');
-		// Upgrade if necessary
-		if($version && ($version < self::TEXT_Version)) {
-			if(self::load_file('upgrade','lib'))
-				FeatherUpgrade::init(self::TEXT_Version);
+	private static function upgrade() {
+		$current_version = self::get_option('version');
+		// Do we need to upgrade?
+		if(version_compare($current_version,self::TEXT_Version) < 0) {
+			require(FEATHER_PATH.'lib/feather-upgrade.php');
+			FeatherUpgrade::init();
 		}
 	}
 
 	/**
-		Set default options
+		Modules
 			@private
 	**/
-	private static function set_default_options() {
-		self::$option=array('version'=>self::TEXT_Version);
-		update_option('feather',self::$option);
+	private static function modules() {
+		$modules = self::get_config('MODULES');
+		$modules_path = FEATHER_THEME_PATH.'modules/';
+		if($modules) {
+			foreach($modules as $name=>$class) {
+				// Full path to module
+				if(!self::$vars['DEPRECATED']) {
+					$module = $modules_path.$name.'/'.$name.'.php';
+				} else {
+					$module = $modules_path.'/'.$name.'.php';
+				}
+				// Load module
+				if(is_file($module)) {
+					require($module);
+					call_user_func(array($class,'init'));
+				}
+			}
+		}
 	}
 
 	/**
-		Register sidebars
+		Taxonomies
 			@private
 	**/
-	private static function register_sidebars() {
-		if(self::get_config('SIDEBARS')) {
-			foreach(self::$config['SIDEBARS'] as $sidebar) {
+	private static function taxonomies() {
+		if(self::get_config('CUSTOM_TAXONOMY')) {
+			$taxonomies = FeatherConfig::load('taxonomy','tax');
+			if($taxonomies) {
+				foreach($taxonomies as $name=>$taxonomy) {
+					if(!isset($taxonomy['type'])) { $taxonomy['type'] = NULL; }
+					if(!isset($taxonomy['args'])) { $taxonomy['args'] = NULL; }
+					register_taxonomy($name,$taxonomy['type'],$taxonomy['args']);
+				}	
+			}
+		}
+	}
+
+	/**
+		Post types
+			@private
+	**/
+	private static function post_types() {
+		if(self::get_config('CUSTOM_TYPE')) {
+			$types = FeatherConfig::load('type','type');
+			if($types) {
+				foreach($types as $type=>$args) {
+					register_post_type($type,$args);
+				}	
+			}
+		}
+	}
+
+	/** 
+		Menus
+			@private
+	**/
+	private static function menus() {
+		$menus = self::get_config('MENUS');
+		if($menus) { register_nav_menus($menus); }
+	}
+
+	/**
+		Sidebars
+			@private
+	**/
+	private static function sidebars() {
+		$sidebars = self::get_config('SIDEBARS');
+		if($sidebars) {
+			foreach($sidebars as $sidebar) {
+				// Single Sidebar
 				if(!isset($sidebar['count'])) {
-					// Single Sidebar
 					register_sidebar($sidebar);
-				} else {
-					$count=$sidebar['count'];
+				}
+				// Multiple Sidebars
+				if(isset($sidebar['count'])) {
+					$count = $sidebar['count'];
 					unset($sidebar['count']);
-					// Multiple Sidebars
 					register_sidebars($count,$sidebar);
 				}
 			}
@@ -442,116 +430,62 @@ class FeatherCore extends FeatherBase {
 	}
 
 	/**
-		Initialize widgets
+		Widgets
 			@private
 	**/
-	private static function widgets_init() {
-		if(self::get_config('WIDGETS')) {
-			foreach(self::$config['WIDGETS'] as $name=>$class) {
-				if(self::load_theme_widget($name))
-					add_action('widgets_init',
-						create_function('','return register_widget("'.$class.'");'));
+	private static function widgets() {
+		$widgets = self::get_config('WIDGETS');
+		$widget_path = get_template_directory().'/widgets/';
+		if($widgets) {
+			foreach($widgets as $name=>$class) {
+				if(is_file($widget_path.$name.'.php')) {
+					require($widget_path.$name.'.php');
+					$function = 'return register_widget("'.$class.'");';
+					add_action('widgets_init',create_function('',$function));
+				}
 			}
 		}
 		// Add action to unregister widgets
-		add_action('widgets_init',__CLASS__.'::unregister_default_wp_widgets',1);
+		add_action('widgets_init',__CLASS__.'::unregister_default_widgets',1);
 	}
 
 	/**
 		Unregister default WP widgets
 			@public
 	**/
-	static function unregister_default_wp_widgets() {
+	static function unregister_default_widgets() {
 		foreach(self::$vars['WP_WIDGETS'] as $id=>$class)
 			if(self::get_option($id))
 				unregister_widget($class);
 	}
 
 	/**
-		Configure theme
-			@private
+		Theme features
+			@public
 	**/
-	private static function configure_theme() {
-		// Theme modules
-		if(self::get_config('MODULES')) {
-			foreach(self::$config['MODULES'] as $file=>$class) {
-				$moddir='modules';
-				if(is_file(FEATHER_PATH_THEME.'modules/'.$file.'/'.$file.'.php'))
-					$moddir='modules/'.$file;
-				if(self::load_theme_file($file,$moddir))
-					call_user_func(array($class,'init'));
+	static function theme_features() {
+		// Automatic Feed Links
+		if(self::get_option('auto_feed_links'))
+			add_theme_support('automatic-feed-links');
+		// Post Thumbnails
+		if(self::get_option('post_thumbnails')) {
+			add_theme_support('post-thumbnails');
+			// Register image sizes
+			if(self::get_config('IMAGE_SIZES')) {
+				foreach(self::$config['IMAGE_SIZES'] as $name=>$image) {
+					if(!isset($image['crop'])) { $image['crop']=FALSE; }
+					add_image_size($name,$image['width'],$image['height'],$image['crop']);
+				}
 			}
 		}
-		// Get theme options
-		if(self::get_config('OPTION_NAME'))
-			self::$theme_option=get_option(self::$config['OPTION_NAME']);
-		// Load theme configuration files
-		if(self::get_config('CUSTOM_META'))
-			self::$theme_meta=FeatherConfig::theme('config-meta','meta');
-		if(self::get_config('CUSTOM_TAXONOMY'))
-			self::$theme_taxonomy=FeatherConfig::theme('config-taxonomy','tax');
-		if(self::get_config('CUSTOM_TYPE'))
-			self::$theme_type=FeatherConfig::theme('config-type','type');
-		// Menu Locations
-		if(self::get_config('MENUS'))
-			register_nav_menus(self::$config['MENUS']);
 		// Post Formats
 		if(self::get_option('post_formats')) {
 			$post_formats=array();
-			foreach(explode('|',self::$vars['WP_POST_FORMATS']) as $format)
-			 if(self::get_option('post_format_'.$format))
-				$post_formats[]=$format;
+			foreach(explode('|',self::$vars['WP_POSTFORMATS']) as $format)
+				if(self::get_option('post_format_'.$format))
+					$post_formats[]=$format;
 			if(!empty($post_formats))
 				add_theme_support('post-formats',$post_formats);
-		}
-		// Post Thumbnails
-		if(self::get_option('post_thumbnails'))
-			add_theme_support('post-thumbnails');
-		// Image Sizes
-		if(self::get_config('IMAGE_SIZES'))
-			foreach(self::$config['IMAGE_SIZES'] as $name=>$image) {
-				if(!isset($image['crop'])) { $image['crop']=FALSE; }
-				add_image_size($name,$image['width'],$image['height'],$image['crop']);
-			}
-		// Register theme taxonomies
-		if(self::$theme_taxonomy) {
-			foreach(self::$theme_taxonomy as $name=>$taxonomy) {
-				if(!isset($taxonomy['args'])) { $taxonomy['args']=array(); }
-				register_taxonomy($name,$taxonomy['type'],$taxonomy['args']);
-			}
-		}
-		// Register theme post types
-		if(self::$theme_type) {
-			foreach(self::$theme_type as $type=>$args)
-				register_post_type($type,$args);
-		}
-
-		/* --------------------------------------------------------------------- */
-
-		// Non-admin configuration
-		if(!is_admin()) {
-			// Register scripts
-			if(self::get_config('SCRIPTS'))
-				add_action('template_redirect',__CLASS__.'::register_scripts');
-			// Add action for theme head
-			add_action('template_redirect',__CLASS__.'::theme_head');
-		}
-	}
-
-	/**
-		Register scripts
-			@public
-	**/
-	static function register_scripts() {
-		foreach(self::$config['SCRIPTS'] as $key=>$params) {
-			// Dependencies
-			$deps=isset($params['deps'])?$params['deps']:FALSE;
-			// Version
-			$ver=isset($params['ver'])?$params['ver']:'1.0';
-			// Place in footer?
-			$footer=isset($params['footer'])?$params['footer']:FALSE;
-			// Register script
-			wp_register_script($key,$params['src'],$deps,$ver,$footer);
 		}
 	}
 
@@ -560,9 +494,6 @@ class FeatherCore extends FeatherBase {
 			@public
 	**/
 	static function theme_head() {
-		// Automatic deed Links
-		if(self::get_option('auto_feed_links'))
-			add_theme_support('automatic-feed-links');
 		// Comment Reply JavaScript
 		if(!self::get_option('commentreply_js'))
 			if(is_singular())
@@ -591,95 +522,69 @@ class FeatherCore extends FeatherBase {
 	}
 
 	/**
-		Init admin
-			@private
+		Register scripts
+			@public
 	**/
-	private static function init_admin() {
-		// Admin error notices
-		add_action('admin_notices',__CLASS__.'::admin_notices');
-		// Load admin library, init framework admin
-		if(self::load_file('admin','lib')) { FeatherAdmin::init(); }
+	static function register_scripts() {
+		$scripts = self::get_config('SCRIPTS');
+		if($scripts) {
+			foreach(self::$config['SCRIPTS'] as $key=>$params) {
+				// Dependencies
+				$deps=isset($params['deps'])?$params['deps']:FALSE;
+				// Version
+				$ver=isset($params['ver'])?$params['ver']:'1.0';
+				// Place in footer?
+				$footer=isset($params['footer'])?$params['footer']:FALSE;
+				// Register script
+				wp_register_script($key,$params['src'],$deps,$ver,$footer);
+			}
+		}
 	}
 
 	/**
 		Custom login page
 			@private
 	**/
-	private static function login_custom() {
-		// Custom login page?
-		if(self::get_option('login_custom')) {
-			// Login Head
-			add_action('login_head',__CLASS__.'::login_head');
-			// Logo URL
-			if(self::get_option('login_logo_url'))
-				add_filter('login_headerurl',__CLASS__.'::login_headerurl');
+	private static function login() {
+		if(self::$vars['PAGENOW']=='wp-login.php') {
+			if(self::get_option('login_custom')) {
+				require(FEATHER_PATH.'modules/feather-login.php');
+				FeatherLogin::init();
+			}
 		}
 	}
 
 	/**
-		Login Logo URL
-			@public
+		Maintenance page
+			@private
 	**/
-	static function login_headerurl($url) {
-		return self::get_option('login_logo_url');
-	}
-
-	/**
-		Login Head
-			@public
-	**/
-	static function login_head() {
-		// Get options
-		$logo=self::get_option('login_logo');
-		$bg_color=self::get_option('login_bg_color');
-		$link_color=self::get_option('login_link_color');
-		$link_color_hover=self::get_option('login_link_color_hover');
-		$login_css=self::get_option('login_css');
-		// Build CSS
-		$output='<style type="text/css">';
-		// Background
-		if($bg_color) {
-			$output.='html { background-color: #'.$bg_color.'!important; }';
-			$output.='#nav, #backtoblog { text-shadow: none }';
-		}
-		// Logo
-		if($logo) {
-			// Get image size
-			$size = getimagesize($logo);
-			// Set width and height
-			$width = $size?'width:'.$size[0].'px;':'';
-			$height = $size?'height:'.$size[1].'px':'';
-			// Logo CSS
-			$output.=' h1 a { background:url('.$logo.') no-repeat; '.$width.$height.' }';
-		}
-		// Link Color
-		if($link_color) {
-			$output.='.login #nav a, .login #backtoblog a { color:#'.$link_color.'!important; }';
-		}
-		// Link Color Hover
-		if($link_color_hover) {
-			$output.='.login #nav a:hover, .login #backtoblog a:hover { color:#'.$link_color_hover.'!important; }';
-		}
-		// Custom CSS
-		if($login_css) {
-			$output.=$login_css;
-		}
-		$output.='</style>';
-		// Print CSS
-		echo $output;
-	}
-
-	/**
-		Generate admin notices
-			@public
-	**/
-	static function admin_notices() {
-		// Error notice
-		if(isset(self::$vars['ERROR'])) {
-			$output='<div id="message" class="error">';
-			$output.='<p>Feather : '.self::$vars['ERROR'].'</p>';
-			$output.='</div>';
-			echo $output;
+	private static function maintenance() {
+		$maintenance = self::get_option('maintenance');
+		if($maintenance && !current_user_can('administrator')) {
+			// Exclude login,register pages
+			$exclude=array('wp-login.php','wp-register.php');
+			if(!in_array(self::$vars['PAGENOW'],$exclude)) {
+				$uri = esc_attr($_SERVER['REQUEST_URI']);
+				// Get URL based on permalinks
+				if(self::$vars['PERMALINKS']) {
+					$url=substr($uri,-12);
+					$redirect_url=home_url().'/_maintenance';
+				} else {
+					$url=isset($_REQUEST['p'])?esc_attr($_REQUEST['p']):'';
+					$redirect_url=home_url().'/?p=_maintenance';
+				}
+				$in_admin = strstr($uri,'wp-admin');
+				// Redirect if not maintenance URL
+				if(('_maintenance'!=$url) && !$in_admin) {
+					header('Location: '.$redirect_url,TRUE,307);
+					exit;
+				}
+				// Load maintenance template
+				if(!$in_admin) {
+					require(FEATHER_PATH.'tmpl/feather-maintenance.php');
+					exit(1);	
+				}
+			}
 		}
 	}
 

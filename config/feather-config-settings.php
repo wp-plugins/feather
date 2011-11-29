@@ -1,255 +1,260 @@
 <?php
 
-/*---------------------------------------------------------------------------*
- * Feather Framework Settings
- *---------------------------------------------------------------------------*/
+$setting = array();
 
+/* General : Theme Support
+/*---------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------*
- * General Tab
- *---------------------------------------------------------------------------*/
+$setting['sections']['theme-support'] = array(
+	'title'		=> 'Theme Support',
+	'tab'		=> 'general'
+);
 
-/* ---- Theme Support ------------------------------------------------------ */
-
-$setting['theme_support']=array(
-	'title'=>'Theme Support',
-	'desc'=>'Register support of theme features. To enable a feature select '.
-		'the appropriate checkbox below.',
-	'tab'=>'general',
-	'fields'=>array(
-		// Automatic feed links
-		'auto_feed_links'=>array(
-			'label'=>'Automatic Feed Links',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'auto_feed_links'=>'Enable support for feed links'
-			)
-		),
-		// Post formats
-		'post_formats'=>array(
-			'label'=>'Post Formats',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'post_formats'=>'Enable support for post formats'
-			)
-		),
-		// Post thumbnails
-		'post_thumbnails'=>array(
-			'label'=>'Post Thumbnails',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'post_thumbnails'=>'Enable support for post thumbnails'
-			)
-		),
+//! Automatic Feed Links
+$setting[] = array(
+	'id'		=> 'auto_feed_links',
+	'label'		=> 'Automatic Feed Links',
+	'section'	=> 'theme-support',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'auto_feed_links' => 'Enable support for feed links'
 	)
 );
 
-/* ---- Post Formats ------------------------------------------------------- */
-
-$setting['post_formats']=array(
-	'title'=>'Post Formats',
-	'desc'=>'Post formats are used to customize the presentation of a post. It '.
-		'gives the theme a tumblog functionality.',
-	'tab'=>'general',
-	'fields'=>array(
-		// Post Formats
-		'post_formats'=>array(
-			'label'=>'Enable Post Formats',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'post_format_aside'=>'Aside',
-				'post_format_audio'=>'Audio',
-				'post_format_chat'=>'Chat',
-				'post_format_gallery'=>'Gallery',
-				'post_format_image'=>'Image',
-				'post_format_link'=>'Link',
-				'post_format_quote'=>'Quote',
-				'post_format_status'=>'Status',
-				'post_format_video'=>'Video',
-			)
-		)
+//! Post Thumbnails
+$setting[] = array(
+	'id'		=> 'post_thumbnails',
+	'label'		=> 'Post Thumbnails',
+	'section'	=> 'theme-support',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'post_thumbnails' => 'Enable support for post thumbnails'
 	)
 );
 
-/* ---- Maintenance Mode --------------------------------------------------- */
-
-$setting['maintenance']=array(
-	'title'=>'Maintenance Mode',
-	'desc'=>'Disable access to your site except for administrators. This '.
-		'option should only be enabled short-term (less than a day).',
-	'tab'=>'general',
-	'fields'=>array(
-		// Maintenance
-		'maintenance'=>array(
-			'label'=>'Disable Public Site Access',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'maintenance'=>'Enable Maintenance Mode'
-			)
-		)
+//! Post Formats
+$setting[] = array(
+	'id'		=> 'post_formats',
+	'label'		=> 'Post Formats',
+	'section'	=> 'theme-support',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'post_formats' => 'Enable support for post formats'
 	)
 );
 
+/* General : Post Formats
+/*---------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------*
- * Sidebar Tab
- *---------------------------------------------------------------------------*/
+$setting['sections']['post-formats'] = array(
+	'title'		=> 'Post Formats',
+	'tab'		=> 'general'
+);
 
-/* ---- Widgets ------------------------------------------------------------ */
-
-$setting['disable_wp_widgets']=array(
-	'title'=>'Disable WordPress Widgets',
-	'desc'=>'Unregister default widgets by selecting the checkboxes below.',
-	'tab'=>'sidebar',
-	'fields'=>array(
-		// Disable widgets
-		'disable_widgets'=>array(
-			'label'=>'Disable Widgets',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'widget_wp_archives'=>'Archives',
-				'widget_wp_calendar'=>'Calendar',
-				'widget_wp_categories'=>'Categories',
-				'widget_wp_custom_menu'=>'Custom Menu',
-				'widget_wp_links'=>'Links',
-				'widget_wp_meta'=>'Meta',
-				'widget_wp_pages'=>'Pages',
-				'widget_wp_recent_comments'=>'Recent Comments',
-				'widget_wp_recent_posts'=>'Recent Posts',
-				'widget_wp_rss'=>'RSS',
-				'widget_wp_search'=>'Search',
-				'widget_wp_tag_cloud'=>'Tag Cloud',
-				'widget_wp_text'=>'Text'
-			)
-		)
+//! Post Formats
+$setting[] = array(
+	'id'		=> 'post_formats',
+	'label'		=> 'Enable Post Formats',
+	'section'	=> 'post-formats',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'post_format_aside'		=> 'Aside',
+		'post_format_audio'		=> 'Audio',
+		'post_format_chat'		=> 'Chat',
+		'post_format_gallery'	=> 'Gallery',
+		'post_format_image'		=> 'Image',
+		'post_format_link'		=> 'Link',
+		'post_format_quote'		=> 'Quote',
+		'post_format_status'	=> 'Status',
+		'post_format_video'		=> 'Video'
 	)
 );
 
+/* General : Maintenance
+/*---------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------*
- * Login Tab
- *---------------------------------------------------------------------------*/
+$setting['sections']['maintenance'] = array(
+	'title'		=> 'Maintenance',
+	'tab'		=> 'general'
+);
 
-/* ---- Enable ------------------------------------------------------------- */
-$setting['login']=array(
-	'title'=>'Custom Login Page',
-	'desc'=>'',
-	'tab'=>'login',
-	'fields'=>array(
-		'login_custom'=>array(
-			'label'=>'Enable',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'login_custom'=>'Enable custom login page'
-			)
-		),
+//! Enable
+$setting[] = array(
+	'id'		=> 'maintenance',
+	'label'		=> 'Enable',
+	'section'	=> 'maintenance',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'maintenance' => 'Enable Maintenance Mode'
 	)
 );
 
-/* ---- Logo --------------------------------------------------------------- */
+/* Sidebar : Widgets
+/*---------------------------------------------------------------------------*/
 
-$setting['customlogo']=array(
-	'title'=>'Logo',
-	'desc'=>'Use a custom logo by uploading an image or selecting an existing '.
-		'image from the Media Library.',
-	'tab'=>'login',
-	'fields'=>array(
-		'login_logo'=>array(
-			'label'=>'Logo Image',
-			'type'=>'image'
-		),
-		'login_logo_url'=>array(
-			'label'=>'Logo URL',
-			'type'=>'text',
-			'class'=>'regular-text'
-		)
+$setting['sections']['wordpress-widgets'] = array(
+	'title'		=> 'Default Widgets',
+	'tab'		=> 'sidebar'
+);
+
+//! Disable widgets
+$setting[] = array(
+	'id'		=> 'disable_wp_widgets',
+	'label'		=> 'Disable WP Widgets',
+	'section'	=> 'wordpress-widgets',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'widget_wp_archives'		=> 'Archives',
+		'widget_wp_calendar'		=> 'Calendar',
+		'widget_wp_categories'		=> 'Categories',
+		'widget_wp_custom_menu'		=> 'Custom Menu',
+		'widget_wp_links'			=> 'Links',
+		'widget_wp_meta'			=> 'Meta',
+		'widget_wp_pages'			=> 'Pages',
+		'widget_wp_recent_comments'	=> 'Recent Comments',
+		'widget_wp_recent_posts'	=> 'Recent Posts',
+		'widget_wp_rss'				=> 'RSS',
+		'widget_wp_search'			=> 'Search',
+		'widget_wp_tag_cloud'		=> 'Tag Cloud',
+		'widget_wp_text'			=> 'Text'
 	)
 );
 
-/* ---- Background --------------------------------------------------------- */
+/* Login : Enable
+/*---------------------------------------------------------------------------*/
 
-$setting['background']=array(
-	'title'=>'Colors',
-	'desc'=>'',
-	'tab'=>'login',
-	'fields'=>array(
-		'login_bg_color'=>array(
-			'label'=>'Background Color',
-			'type'=>'colorpicker'
-		),
-		'login_link_color'=>array(
-			'label'=>'Link Color',
-			'type'=>'colorpicker'
-		),
-		'login_link_color_hover'=>array(
-			'label'=>'Link Color Hover',
-			'type'=>'colorpicker'
-		)
+$setting['sections']['login-enable'] = array(
+	'title'		=> 'Login Page',
+	'tab'		=> 'login'
+);
+
+//! Enable
+$setting[]=array(
+	'id'		=> 'login_custom',
+	'label'		=> 'Enable',
+	'section'	=> 'login-enable',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'login_custom'	=> 'Enable custom login page'
 	)
 );
 
-/* ---- CSS ---------------------------------------------------------------- */
+/* Login : Logo
+/*---------------------------------------------------------------------------*/
 
-$setting['logincss']=array(
-	'title'=>'Custom CSS',
-	'desc'=>'',
-	'tab'=>'login',
-	'fields'=>array(
-		'login_css'=>array(
-			'label'=>'CSS',
-			'type'=>'textarea',
-			'rows'=>'24'
-		)
+$setting['sections']['login-logo'] = array(
+	'title'		=> 'Logo',
+	'tab'		=> 'login'
+);
+
+//! Logo
+$setting[]=array(
+	'id'		=> 'login_logo',
+	'label'		=> 'Logo Image',
+	'section'	=> 'login-logo',
+	'type'		=> 'image'
+);
+
+//! Logo URL
+$setting[]=array(
+	'id'		=> 'login_logo_url',
+	'label'		=> 'Logo URL',
+	'section'	=> 'login-logo',
+	'type'		=> 'text',
+	'class'		=> 'regular-text'
+);
+
+/* Login : Colors
+/*---------------------------------------------------------------------------*/
+
+$setting['sections']['login-colors'] = array(
+	'title'		=> 'Colors',
+	'tab'		=> 'login'
+);
+
+//! Background Color
+$setting[] = array(
+	'id'		=> 'login_bg_color',
+	'label'		=> 'Background Color',
+	'section'	=> 'login-colors',
+	'type'		=> 'colorpicker'
+);
+
+//! Link Color
+$setting[] = array(
+	'id'		=> 'login_link_color',
+	'label'		=> 'Link Color',
+	'section'	=> 'login-colors',
+	'type'		=> 'colorpicker'
+);
+
+//! Link Color Hover
+$setting[] = array(
+	'id'		=> 'login_link_color_hover',
+	'label'		=> 'Link Color Hover',
+	'section'	=> 'login-colors',
+	'type'		=> 'colorpicker'
+);
+
+/* Login : CSS
+/*---------------------------------------------------------------------------*/
+
+$setting['sections']['login-css'] = array(
+	'title'		=> 'CSS',
+	'tab'		=> 'login'
+);
+
+//! Custom CSS
+$setting[] = array(
+	'id'		=> 'login_css',
+	'label'		=> 'Custom CSS',
+	'section'	=> 'login-css',
+	'type'		=> 'textarea',
+	'rows'		=> '24'
+);
+
+/* Advanced : Cleanup <head>
+/*---------------------------------------------------------------------------*/
+
+$setting['sections']['cleanup-head'] = array(
+	'title'		=> 'Cleanup &lt;head&gt;',
+	'tab'		=> 'advanced'
+);
+
+//! Remove link elements
+$setting[] = array(
+	'id'		=> 'cleanup_head',
+	'label'		=> 'Remove Link Elements',
+	'section'	=> 'cleanup-head',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'l10n.js'						  => 'l10n.js',
+		'feed_links_extra'				  => 'feed_links_extra',
+		'rsd_link'						  => 'rsd_link',
+		'wlwmanifest_link'				  => 'wlwmanifest_link',
+		'index_rel_link'				  => 'index_rel_link',
+		'parent_post_rel_link'			  => 'parent_post_rel_link',
+		'start_post_rel_link'			  => 'start_post_rel_link',
+		'adjacent_posts_rel_link_wp_head' => 'adjacent_posts_rel_link_wp_head',
+		'wp_shortlink_wp_head'			  => 'wp_shortlink_wp_head'
 	)
 );
 
+/* Advanced : Comment Reply Javascript
+/*---------------------------------------------------------------------------*/
 
-/*---------------------------------------------------------------------------*
- * Advanced Tab
- *---------------------------------------------------------------------------*/
-
-/* ---- Cleanup <head> ----------------------------------------------------- */
-
-$setting['cleanup_head']=array(
-	'title'=>'Cleanup &lt;head&gt;',
-	'desc'=>'Several link elements are automatically added to the &lt;head&gt; '.
-		'of your theme. Remove elements by selecting the appropriate checkboxes.',
-	'tab'=>'advanced',
-	'fields'=>array(
-		// Remove link wlements
-		'cleanup_head'=>array(
-			'label'=>'Remove Link Element(s)',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'l10n.js'=>'l10n.js',
-				'feed_links_extra'=>'feed_links_extra',
-				'rsd_link'=>'rsd_link',
-				'wlwmanifest_link'=>'wlwmanifest_link',
-				'index_rel_link'=>'index_rel_link',
-				'parent_post_rel_link'=>'parent_post_rel_link',
-				'start_post_rel_link'=>'start_post_rel_link',
-				'adjacent_posts_rel_link_wp_head'=>'adjacent_posts_rel_link_wp_head',
-				'wp_shortlink_wp_head'=>'wp_shortlink_wp_head'
-			)
-		)
-	)
+$setting['sections']['comment-reply-js'] = array(
+	'title'		=> 'Comment Reply Javascript',
+	'tab'		=> 'advanced'
 );
 
-/* ---- Comment Reply Javascript ------------------------------------------- */
-
-$setting['commentreplyjs']=array(
-	'title'=>'Comment Reply Javascript',
-	'desc'=>'This script moves the comment form just below the comment when '.
-		'replying to a comment. Check the box below to disable this script.',
-	'tab'=>'advanced',
-	'fields'=>array(
-		// Disable comment-reply.js
-		'commentreplyjs'=>array(
-			'label'=>'Disable Script',
-			'type'=>'checkbox',
-			'choices'=>array(
-				'commentreply_js'=>'Disable comment-reply.js'
-			)
-		)
+//! Disable comment-reply.js
+$setting[] = array(
+	'id'		=> 'commentreplyjs',
+	'label'		=> 'Disable',
+	'section'	=> 'comment-reply-js',
+	'type'		=> 'checkbox',
+	'choices'	=> array(
+		'commentreply_js' => 'Disable comment-reply.js'
 	)
 );

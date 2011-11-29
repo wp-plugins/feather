@@ -12,25 +12,29 @@
 	Jermaine Marée
 
 		@package FeatherForm
-		@version 1.1
+		@version 1.2
 **/
 
 //! Creates form fields
 class FeatherForm extends FeatherBase {
 
 	/**
-		Compiles an array of HTML attributes into an attribute string
+		Button
 			@return string
 			@param $attrs array
 			@public
 	**/
-	static function attributes(array $attrs) {
-		if(!empty($attrs)) {
-			$result='';
-			foreach($attrs as $key=>$val)
-				$result.=' '.$key.'="'.$val.'"';
-			return $result;
-		}
+	static function button(array $attrs) {
+		// Default attributes
+		$defaults = array(
+			'type'	=> 'button',
+			'value'	=> __('Save Changes','feather')
+		);
+		// Parse args
+		$attrs = wp_parse_args($attrs,$defaults);
+		// Create field
+		$field = '<input'.self::attributes($attrs).'/>';
+		return $field;
 	}
 
 	/**

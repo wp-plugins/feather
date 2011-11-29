@@ -1,7 +1,7 @@
 <?php
 
 /**
-	Admin Library for the Feather Framework
+	Feather Admin Library
 
 	The contents of this file are subject to the terms of the GNU General
 	Public License Version 2.0. You may not use this file except in
@@ -9,48 +9,76 @@
 	can be waived if you get permission from the copyright holder.
 
 	Copyright (c) 2011 Bandit Media
-	Jermaine Marée
+	Jermaine Maree
 
 		@package FeatherAdmin
-		@version 1.1
+		@version 1.2
 **/
 
 class FeatherAdmin extends FeatherBase {
 
+	protected static
+		//! Plugin Hook
+		$hook;
+
 	/**
 		Admin methods and actions
-			@private
+			@public
 	**/
-	static function init() {
-		// Load form library
-		self::load_file('form','lib');
-		// Load settings library
-		self::load_file('settings','lib');
-		// Setting Notices
-		add_action('admin_notices',__CLASS__.'::setting_notices');
-		// Admin menu
-		add_action('admin_menu',__CLASS__.'::admin_menu');
+	static function boot() {
 		// Admin init
-		if(in_array(self::$vars['PAGENOW'],
-			array('options-general.php','options.php')))
-			add_action('admin_init',__CLASS__.'::admin_init');
-		// Theme Meta
-		if(in_array(self::$vars['PAGENOW'],array('post.php','post-new.php')))
-			if(self::$theme_meta) {
-				// Load Meta library
-				self::load_file('meta','lib');
-				// Add action to add meta boxes
-				add_action('add_meta_boxes','FeatherMeta::init');
-				// Add action to save meta
-				add_action('save_post','FeatherMeta::save_meta');
-			}
+		add_action('admin_init',__CLASS__.'::init');
+		// Admin notices
+		add_action('admin_notices',__CLASS__.'::notices');
+		// Admin menu
+		add_action('admin_menu',__CLASS__.'::menu');
+		// Meta boxes
+		if(!isset(self::$vars['DEPRECATED'])) {
+			self::meta();
+		} else {
+			self::meta_deprecated();
+		}
+		
 	}
 
 	/**
-		Setting notices
+		Admin methods and actions
 			@public
 	**/
-	static function setting_notices() {
+	static function init() {
+		// Set Hook
+		self::$hook = get_plugin_page_hook('feather','options-general.php');
+		// Register setting
+		register_setting('feather-settings','feather','FeatherValidate::init');
+		// Load validation library
+		require(FEATHER_PATH.'lib/feather-validate.php');
+		// Plugin-specific actions
+		add_action('load-'.self::$hook,__CLASS__.'::feather_init');
+		// Plugin styles
+		add_action('admin_print_styles-'.self::$hook,__CLASS__.'::styles');
+		// Plugin scripts
+		add_action('admin_print_scripts-'.self::$hook,__CLASS__.'::scripts');
+	}
+
+	/**
+		Admin notice
+			@public
+	**/
+	static function notices() {
+		// Framework notices
+		if(self::$notices) {
+			$output = '';
+			foreach(self::$notices as $notice) {
+				// Sanitation
+				$class = esc_attr($notice['class']);
+				$message = esc_attr($notice['message']);
+				// HTML
+				$output .= '<div id="message" class="'.$class.'">'.
+					'<p>'.$message.'</p></div>';
+			}
+			echo $output;
+		}
+		// Setting notices
 		settings_errors('feather_setting_notices');
 	}
 
@@ -58,29 +86,151 @@ class FeatherAdmin extends FeatherBase {
 		Admin menu
 			@public
 	**/
-	static function admin_menu() {
+	static function menu() {
 		// Add page to the Settings menu
 		add_options_page('Feather','Feather','manage_options',
 			'feather',__CLASS__.'::options_page');
 	}
 
 	/**
-		Admin settings page
+		Options page
 			@public
 	**/
 	static function options_page() {
-		if(!self::load_file('options-page','tmpl')) {
-			// Could not load options page, print error
-			$message=sprintf(self::TEXT_File,self::$prefix.'-'.$file.'.php');
-			echo '<div class="wrap"><div id="message" class="error"><p>'.
-				'Feather : '.$message.'</p></div></div>';
+		$tabs = self::$vars['TABS'];
+		$current_tab = self::get_current_tab($tabs);
+		require(FEATHER_PATH.'tmpl/feather-options-page.php');
+	}
+
+	/**
+		Meta
+	**/
+	private static function meta() {
+		if(self::get_config('CUSTOM_META')) {
+			$pages = array('post.php','post-new.php');
+			if(in_array(self::$vars['PAGENOW'],$pages)) {
+				// Load meta library
+				require(FEATHER_PATH.'lib/feather-meta.php');
+				// Initialize settings library
+				FeatherMeta::init();
+			}	
 		}
 	}
 
 	/**
-		Print options page tabs
-			@param $page string
+		Feather settings page init
 			@public
+	**/
+	static function feather_init() {
+		// Load settings library
+		require(FEATHER_PATH.'lib/feather-settings.php');
+		// Feather settings
+		$settings = FeatherConfig::load('settings','setting',TRUE);
+		// Initialize settings library
+		FeatherSettings::init('feather',$settings);
+	}
+
+	/**
+		Scripts
+			@public
+	**/
+	static function scripts() {
+		// Javascript URL
+		$url = FEATHER_URL.'assets/js/';
+		// Javascript Path
+		$path = FEATHER_PATH.'assets/js/';
+		// Register colorpicker.js
+		wp_register_script('feather-color-js',$url.'colorpicker.js',array('jquery'));
+		// feather.js Dependencies
+		$js_dep = array('media-upload','thickbox','jquery','feather-color-js');
+		// feather.js Version
+		$js_ver = filemtime($path.'feather.js');
+		// Enqueue feather.js script
+		wp_enqueue_script('feather-js',$url.'feather.js',$js_dep,$js_ver);
+	}
+
+	/**
+		Styles
+			@public
+	**/
+	static function styles() {
+		// CSS URL
+		$url = FEATHER_URL.'assets/css/';
+		// CSS Path
+		$path = FEATHER_PATH.'assets/css/';
+		// Register colorpicker.css
+		wp_register_style('feather-color-css',$url.'colorpicker.css',FALSE);
+		// feather.css Dependencies
+		$css_dep = array('thickbox','feather-color-css');
+		// feather.css Version
+		$css_ver = filemtime($path.'feather.css');
+		// Enqueue style
+		wp_enqueue_style('feather-css',$url.'feather.css',$css_dep,$css_ver);
+	}
+
+	/**
+		Get current tab
+			@param $tabs array
+			@public
+	**/
+	static function get_current_tab($tabs) {
+		reset($tabs);
+		$current_tab = isset($_GET['tab'])?esc_attr($_GET['tab']):key($tabs);
+		return $current_tab;
+	}
+
+	/**
+		Print tabs
+			@param $tabs array
+			@public
+	**/
+	static function print_tabs($tabs) {
+		// Current tab
+		$current = self::get_current_tab($tabs);
+		// Build tabs
+		if(function_exists('get_screen_icon')) {
+			$output = get_screen_icon().'<h2 class="nav-tab-wrapper">';
+		} else {
+			$output = '<div id="icon-themes" class="icon32"><br /></div>'.
+				'<h2 class="nav-tab-wrapper">';
+		}
+		// Create links
+		foreach($tabs as $tab=>$name) {
+			$attrs = array(
+				'class' => ($tab==$current)?'nav-tab nav-tab-active':'nav-tab',
+				'href'	=> '?page=feather&tab='.$tab
+			);
+			$output .= '<a'.self::attributes($attrs).'>'.$name.'</a>';
+		}
+		$output .= '</h2>';
+		// Output HTML
+		echo $output;
+	}
+
+	/* DEPRECATED FUNCTIONS
+	/*-----------------------------------------------------------------------*/
+
+	/**
+		Meta *** DEPRECATED
+	**/
+	private static function meta_deprecated() {
+		// Theme Meta
+		if(in_array(self::$vars['PAGENOW'],array('post.php','post-new.php'))) {
+			self::$theme_meta = FeatherConfig::theme('config-meta','meta');
+			if(self::$theme_meta) {
+				// Load Meta library
+				require(FEATHER_PATH.'lib/feather-form.php');
+				require(FEATHER_PATH.'lib/_deprecated/feather-meta.php');
+				// Add action to add meta boxes
+				add_action('add_meta_boxes','FeatherMeta::init');
+				// Add action to save meta
+				add_action('save_post','FeatherMeta::save_meta');
+			}
+		}
+	}
+
+	/**
+		Print options page tabs *** DEPRECATED ***
 	**/
 	static function print_options_page_tabs($page='theme') {
 		// Set tabs
@@ -117,9 +267,7 @@ class FeatherAdmin extends FeatherBase {
 	}
 
 	/**
-		Get current options page tab
-			@param $tab string
-			@public
+		Get current options page tab *** DEPRECATED ***
 	**/
 	static function get_current_options_page_tab($page='theme') {
 		// Set tabs
@@ -137,195 +285,45 @@ class FeatherAdmin extends FeatherBase {
 	}
 
 	/**
-		Admin init
-			@public
-	**/
-	static function admin_init() {
-		// Register setting
-		register_setting('feather-settings','feather',
-			__CLASS__.'::validate_settings');
-		// Initialize framework settings
-		self::settings_init();
-		// Stylesheets
-		add_action('admin_print_styles-settings_page_feather',
-			__CLASS__.'::stylesheets');
-		// Javascript
-		add_action('admin_print_scripts-settings_page_feather',
-			__CLASS__.'::javascript');
-	}
-
-	/**
-		Validate settings
-			@public
-	**/
-	static function validate_settings($input) {
-		// Get tab
-		$tab=$input['tab'];
-		// Unset tab option
-		unset($input['tab']);
-		// Get current options
-		$valid=self::$option?self::$option:array();
-
-		// Validate settings
-		switch($tab) {
-
-			// General Tab
-			case 'general':
-				// Define checkbox options
-				$checkboxes='auto_feed_links|post_formats|post_thumbnails|maintenance|'.
-					'post_format_aside|post_format_audio|post_format_chat|'.
-					'post_format_gallery|post_format_image|post_format_link|'.
-					'post_format_quote|post_format_status|post_format_video';
-				// Validate options
-				foreach(explode('|',$checkboxes) as $option) {
-					// Check for required settings
-					if(isset(self::$config['OPTION_REQUIRED'][$option])) {
-						// Set required value
-						$valid[$option]=self::$config['OPTION_REQUIRED'][$option];
-					} else {
-						// Set input value
-						$valid[$option]=isset($input[$option])?'1':'0';
-					}
-				}
-				break;
-
-			// Sidebar Tab
-			case 'sidebar':
-				// Define checkbox options
-				$checkboxes='widget_wp_archives|widget_wp_calendar|widget_wp_categories|'.
-					'widget_wp_custom_menu|widget_wp_links|widget_wp_meta|widget_wp_pages|'.
-					'widget_wp_recent_comments|widget_wp_recent_posts|widget_wp_rss|'.
-					'widget_wp_search|widget_wp_tag_cloud|widget_wp_text';
-				// Validate options
-				foreach(explode('|',$checkboxes) as $option) {
-					// Check for required settings
-					if(isset(self::$config['OPTION_REQUIRED'][$option])) {
-						// Set required value
-						$valid[$option]=self::$config['OPTION_REQUIRED'][$option];
-					} else {
-						// Set input value
-						$valid[$option]=isset($input[$option])?'1':'0';
-					}
-				}
-				break;
-
-			// Login Tab
-			case 'login':
-				// Login Custom
-				$valid['login_custom']=isset($input['login_custom'])?'1':'0';
-				// Logo
-				$valid['login_logo']=isset($input['login_logo'])?esc_url($input['login_logo']):'';
-				$valid['login_logo_url']=isset($input['login_logo_url'])?esc_url($input['login_logo_url']):'';
-				// Colors
-				$valid['login_bg_color']=isset($input['login_bg_color'])?esc_attr($input['login_bg_color']):'';
-				$valid['login_link_color']=isset($input['login_link_color'])?esc_attr($input['login_link_color']):'';
-				$valid['login_link_color_hover']=isset($input['login_link_color_hover'])?esc_attr($input['login_link_color_hover']):'';
-				// CSS
-				$valid ['login_css']=isset($input['login_css'])?esc_attr($input['login_css']):'';
-				break;
-
-			// Advanced Tab
-			case 'advanced':
-				// Define checkbox options
-				$checkboxes='maintenance|l10n.js|feed_links_extra|rsd_link|'.
-					'wlwmanifest_link|index_rel_link|parent_post_rel_link|'.
-					'start_post_rel_link|adjacent_posts_rel_link_wp_head|'.
-					'wp_shortlink_wp_head|commentreply_js';
-				// Validate options
-				foreach(explode('|',$checkboxes) as $option) {
-					// Check for required settings
-					if(isset(self::$config['OPTION_REQUIRED'][$option])) {
-						// Set required value
-						$valid[$option]=self::$config['OPTION_REQUIRED'][$option];
-					} else {
-						// Set input value
-						$valid[$option]=isset($input[$option])?'1':'0';
-					}
-				}
-				break;
-
-		}
-		// Settings saved notice
-		add_settings_error('feather_setting_notices',
-			esc_attr('settings_updated'),__('Settings saved.'),'updated');
-		return $valid;
-	}
-
-	/**
-		Settings init
-			@private
-	**/
-	private static function settings_init() {
-		// Framework settings
-		self::$setting=FeatherConfig::framework('settings','setting');
-		// Check if post formats enabled
-		if(!self::get_option('post_formats'))
-			unset(self::$setting['post_formats']);
-		// Process settings
-		self::process_settings(self::$setting,'feather');
-	}
-
-	/**
-		Process settings
-			@public
+		Process settings *** DEPRECATED ***
 	**/
 	static function process_settings(array $settings,$option,$optionfunc=NULL) {
-		// Add settings sections
-		foreach($settings as $id=>$section) {
-			// Set section id
-			$section['id']=self::$prefix.'_'.$id;
-			// Set section callback
-			$section['callback']=$id;
-			// Add section
-			FeatherSettings::add_section($section,$option);
-			// Add settings fields
-			foreach($section['fields'] as $fid=>$field) {
-				// Set field id
-				$field['id']=$fid;
-				// Set field tab
-				$field['tab']=$section['tab'];
-				// Set field setting
-				$field['setting']=$option;
-				// Set field section
-				$field['section']=$section['id'];
-				// Set option function
-				if(isset($optionfunc))
-					$field['optionfunc']=$optionfunc;
-				// Add field
-				FeatherSettings::add_field($field,$option);	
+		$page = isset($_GET['page'])?esc_attr($_GET['page']):FALSE;
+		if($page && ($page=='feather')) {
+			require(FEATHER_PATH.'lib/feather-form.php');
+			require(FEATHER_PATH.'lib/_deprecated/feather-settings.php');
+			if(!$optionfunc) {
+				$optionfunc = 'FeatherBase::get_theme_option';
+			}
+			// Add settings sections
+			foreach($settings as $id=>$section) {
+				// Set section id
+				$section['id']=self::$prefix.'_'.$id;
+				// Set section callback
+				$section['callback']=$id;
+				// Add section
+				FeatherSettings::add_section($section,$option);
+				// Add settings fields
+				foreach($section['fields'] as $fid=>$field) {
+					// Set field id
+					$field['id']=$fid;
+					// Set field tab
+					$field['tab']=$section['tab'];
+					// Set field setting
+					$field['setting']=$option;
+					// Set field section
+					$field['section']=$section['id'];
+					// Set option function
+					if(isset($optionfunc))
+						$field['optionfunc']=$optionfunc;
+					// Add field
+					FeatherSettings::add_field($field,$option);	
+				}
 			}
 		}
 	}
 
-	/**
-		Stylesheets
-			@public
-	**/
-	static function stylesheets() {
-		wp_enqueue_style('feather-admin-css',
-			FEATHER_URL.'assets/css/feather-admin.css',FALSE,20110915);
-		// Load tab specific styles
-		if('login'==FeatherAdmin::get_current_options_page_tab('feather')) {
-			wp_enqueue_style('thickbox');
-			wp_enqueue_style('feather-colorpicker',
-				FEATHER_URL.'assets/css/colorpicker.css',FALSE,20110915);
-		}
-			
-	}
-
-	/**
-		Javascript
-			@public
-	**/
-	static function javascript() {
-		// Register scripts
-		wp_register_script('feather-colorpicker',FEATHER_URL.'assets/js/colorpicker.js',
-			array('jquery'),20111120);
-		wp_register_script('feather-admin-login',FEATHER_URL.'assets/js/feather-admin-login.js',
-			array('media-upload','thickbox','jquery','feather-colorpicker'),20111120);
-		// Load tab specific scripts
-		if('login'==FeatherAdmin::get_current_options_page_tab('feather'))
-			wp_enqueue_script('feather-admin-login');
-	}
+	/* END DEPRECATED FUNCTIONS
+	/*-----------------------------------------------------------------------*/
 
 }

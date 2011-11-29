@@ -9,205 +9,312 @@
 	can be waived if you get permission from the copyright holder.
 
 	Copyright (c) 2011 Bandit Media
-	Jermaine Marée
+	Jermaine Maree
 
 		@package FeatherSettings
-		@version 1.1
+		@version 1.2
 **/
 
-//! Settings Class
+//! FeatherSettings
 class FeatherSettings extends FeatherBase {
 
 	protected static
-		//! Temp Variable
-		$tmp;
+		//! Option name
+		$option_name,
+		//! Options
+		$option,
+		//! Sections,
+		$sections,
+		//! Settings
+		$settings;
 
 	/**
-		Add section
-			@param $section array
-			@public
+		Init
 	**/
-	static function add_section(array $section,$option) {
-		extract($section);
-		add_settings_section($id,$title,__CLASS__.'::section_callback',$option.'-'.$tab);
+	static function init($option_name,$settings) {
+		// Option Name
+		self::$option_name = $option_name;
+		// Options
+		self::$option = get_option(self::$option_name);
+		// Sections
+		self::$sections = $settings['sections'];
+		unset($settings['sections']);
+		// Settings
+		self::$settings = $settings;
+		// Load form library
+		require(FEATHER_PATH.'lib/feather-form.php');
+		// Add Sections
+		self::add_sections();
+		// Add Fields
+		self::add_fields();
 	}
 
 	/**
-		Section callback
-			@public
+		Get option
 	**/
-	static function section_callback($section) {
-		// Check for section id
-		if($section['id']) {
-			$id=substr($section['id'],8);
-			// Reference tmp variable to settings
-			if(!isset(self::$tmp['settings'])) {
-				// Framework settings
-				if(isset(self::$setting))
-					self::$tmp['settings']=&self::$setting;
-				// Theme settings
-				if(isset(self::$theme_setting))
-					self::$tmp['settings']=&self::$theme_setting;
-			}
-			// Print section desc
-			if(self::$tmp['settings'][$id]['desc'])
-				self::print_section_desc(self::$tmp['settings'][$id]['desc']);
+	static function get_option($key) {
+		$value = isset(self::$option[$key])?self::$option[$key]:FALSE;
+		return $value;
+	}
+
+	/**
+		Add sections
+	**/
+	private static function add_sections($prefix='feather-') {
+		// Defaults
+		$defaults = array(
+			'title'		=> __('Default Title','feather'),
+			'callback'	=> __CLASS__.'::print_section_heading'
+		);
+		// Loop through sections
+		foreach(self::$sections as $id => $args) {
+			extract(wp_parse_args($args,$defaults));
+			// Prefix tab
+			$tab = $prefix.$tab;
+			// Add section
+			add_settings_section($id,$title,$callback,$tab);
 		}
 	}
 
 	/**
-		Add field
-			@param $field array
-			@public
+		Print section heading
 	**/
-	static function add_field(array $field,$option) {
-		extract($field);
-		// Setting field callback
-		$callback=isset($callback)?$callback:__CLASS__.'::print_field';
-		// Add settings field
-		add_settings_field($id,$label,$callback,$option.'-'.$tab,$section,$field);
+	static function print_section_heading($args) {
+		$id = $args['id'];
+		$desc = '';
+		if(isset(self::$sections[$id]['desc'])) {
+			$desc = self::$sections[$id]['desc'];
+			echo '<p>'.$desc.'</p>';
+		}
 	}
 
 	/**
-		Print section description
-			@param $function string
-			@public
+		Fields
 	**/
-	private static function print_section_desc($desc) {
-		echo '<p>'.$desc.'</p>';
+	private static function add_fields($prefix='feather-') {
+		// Defaults
+		$defaults = array(
+			'std'		=> '',
+			'class'		=> '',
+			'choices'	=> array(),
+			'callback'	=> __CLASS__.'::print_field'
+		);
+		// Loop through fields
+		foreach(self::$settings as $field) {
+			extract(wp_parse_args($field,$defaults));
+			// Set arguments
+			$args = array(
+				'id'		=> $id,
+				'name'		=> self::$option_name.'['.$id.']',
+				'std'		=> $std,
+				'type'		=> $type,
+				'class'		=> $class,
+				'choices'	=> $choices
+			);
+			// Set tab
+			$tab = $prefix.self::$sections[$section]['tab'];
+			// Add field
+			add_settings_field($id,$label,$callback,$tab,$section,$args);
+		}
 	}
 
 	/**
 		Print field
-			@param $field array
-			@public
 	**/
 	static function print_field($args) {
-		extract($args);
-		// Verify setting has been set
-		if(!isset($setting)) { return; }
-		// Set option function
-		if(!isset($optionfunc)) {
-			if('feather'==$setting)
-				$optionfunc='FeatherCore::get_option';
-			else
-				$optionfunc='FeatherCore::get_theme_option';
+		// Get field type
+		$type = $args['type'];
+		unset($args['type']);
+		// Create field
+		switch ($type) {
+			// Checkbox
+			case 'checkbox':
+				$output = self::field_checkbox($args);
+				break;
+			// Color
+			case 'colorpicker':
+				$output = self::field_colorpicker($args);
+				break;
+			// Image
+			case 'image':
+				$output = self::field_image($args);
+				break;
+			case 'radio':
+				$output = self::field_radio($args);
+				break;
+			// Select
+			case 'select':
+				$output = self::field_select($args);
+				break;
+			// Text
+			case 'text':
+				$output = self::field_text($args);
+				break;
+			// Textarea
+			case 'textarea':
+				$output = self::field_textarea($args);
+				break;
 		}
-		// Set $output to empty string
-		$output='';
-		// Set attributes
-		$attrs=array(
-			'id'=>$setting.'['.$id.']',
-			'name'=>$setting.'['.$id.']'
-		);
-		// Set class
-		if(isset($class)) { $attrs['class']=$class; }
-
-		// Checkbox
-		if('checkbox'==$type) {
-			foreach($choices as $key=>$label) {
-				// Set attributes
-				$attrs=array(
-					'id'=>$setting.'['.$key.']',
-					'name'=>$setting.'['.$key.']'
-				);
-				if($setting=='feather' && isset(self::$config['OPTION_REQUIRED'][$key])) {
-					// Set value
-					$value=self::$config['OPTION_REQUIRED'][$key];
-					// Disable setting
-					$attrs['disabled']='disabled';
-					// Lighten label
-					$label='<span style="color:#777;">'.$label.'</span>';
-				} else {
-					// Get value
-					$value=call_user_func_array($optionfunc,array($key));
-				}
-				// Create checkbox setting
-				$output.='<label for="'.$attrs['name'].'">';
-				$output.=FeatherForm::checkbox($attrs,$value);
-				$output.=' '.$label.'</label><br />';
-			}
-		}
-
-		// Colorpicker
-		if('colorpicker'==$type) {
-			// Get value
-			$value=call_user_func_array($optionfunc,array($id));
-			$bg=$value?$value:'ccc';
-			// Text Field
-			$output='<div class="feather-colorpicker"><div style="background-color: #'.$bg.';"></div></div>';
-			$output.='<input id="'.$attrs['name'].'" type="text" name="'.$attrs['name'].'" '.
-				'class="small-text" value="'.esc_attr($value).'" maxlength="6" />';
-		}
-
-		// Image
-		if('image'==$type) {
-			// Get value
-			$value=call_user_func_array($optionfunc,array($id));
-			// Text field
-			$output='<input id="'.$attrs['name'].'" type="text" name="'.$attrs['name'].'" '.
-				'class="regular-text" value="'.esc_attr($value).'" />';
-			// Button
-			$output.='<input id="'.$setting.'['.$id.'_button]" '.
-				'class="button-secondary feather-image-button" type="button" '.
-				'value="Select Image" data-id="'.$id.'" />';
-			// Image placeholder
-			$output.='<div id="feather_'.$id.'_placeholder" class="feather_image_placeholder">';
-			if($value) {
-				$output.='<img src="'.$value.'" />';
-			}
-			$output.='</div>';
-		}
-
-		// Radio
-		if('radio'==$type) {
-			// Get value
-			$val=call_user_func_array($optionfunc,array($id));
-			$selected=$val?$val:key($choices);
-			foreach($choices as $value=>$label) {
-				// Set attributes
-				$attrs=array(
-					'id'=>$setting.'['.$id.']',
-					'name'=>$setting.'['.$id.']'
-				);
-				// Create radio setting
-				$output.='<label>'.FeatherForm::radio($attrs,$value,$selected).'<span>'.$label.'</span></label><br />';
-			}
-		}
-
-		// Select
-		if('select'==$type) {
-			// Get value
-			$value=call_user_func_array($optionfunc,array($id));
-			// Create select field
-			$output.=FeatherForm::select($attrs,$value,$choices);
-		}
-
-		// Text
-		if('text'==$type) {
-			// Get value
-			$value=call_user_func_array($optionfunc,array($id));
-			// Set class
-			if(!isset($attrs['class']))
-				$attrs['class']='regular-text';
-			// Create text setting
-			$output.=FeatherForm::text($attrs,$value);
-		}
-
-		// Textarea
-		if('textarea'==$type) {
-			// Get value
-			$value=call_user_func_array($optionfunc,array($id));
-			// Set attributes
-			$attrs['cols']=isset($cols)?$cols:'50';
-			$attrs['rows']=isset($rows)?$rows:'8';
-			$attrs['class']=isset($class)?$class:'large-text';
-			// Create textarea setting
-			$output.='<p>'.FeatherForm::textarea($attrs,$value).'</p>';
-		}
-
 		// Print field
 		echo $output;
+	}
+
+	/**
+		Checkbox field
+	**/
+	private static function field_checkbox($args) {
+		extract($args);
+		$field = '';
+		foreach($choices as $key=>$label) {
+			// Get value
+			$value = self::get_option($key)?self::get_option($key):$std;
+			// Set attributes
+			$attrs = array(
+				'id'	=> 'feather_'.$key,
+				'name'	=> self::$option_name.'['.$key.']',
+				'class'	=> $class
+			);
+			// Create checkbox field
+			$field .= FeatherForm::checkbox($attrs,$value);
+			$field .= ' <label for="'.$attrs['name'].'">'.$label.'</label><br />';
+		}
+		// Return field
+		return $field;
+	}
+
+	/**
+		Colorpicker field
+	**/
+	private static function field_colorpicker($args) {
+		extract($args);
+		// Get value
+		$value = self::get_option($id)?self::get_option($id):$std;
+		// Colorpicker color
+		$bg = $value?$value:'ccc';
+		// Colorpicker div
+		$field = '<div class="feather-colorpicker"><div style="background-color:#'.$bg.';"></div></div>';
+		// Set attributes
+		$attrs = array(
+			'id'		=> 'feather_'.$id,
+			'name'		=> $name,
+			'class'		=> 'small-text',
+			'maxlength'	=> '6'
+		);
+		// Create text field
+		$field .= FeatherForm::text($attrs,$value);
+		// Return field
+		return $field;
+	}
+
+	/**
+		Image field
+	**/
+	private static function field_image($args) {
+		extract($args);
+		// Get value
+		$value = self::get_option($id)?self::get_option($id):$std;
+		// Set text attributes
+		$attrs = array(
+			'id'	=> 'feather_'.$id,
+			'name'	=> $name,
+			'class'	=> $class?$class:'regular-text'
+		);
+		// Create text field
+		$field = FeatherForm::text($attrs,$value);
+		// Set button attributes
+		$attrs2 = array(
+			'id'	=> $id.'_button',
+			'class'	=> 'button-secondary feather-image-button',
+			'value' => __('Select Image','feather')
+		);
+		// Create button
+		$field .= FeatherForm::button($attrs2);
+		// Return field
+		return $field;
+	}
+
+	/**
+		Radio field
+	**/
+	private static function field_radio($args) {
+		extract($args);
+		$field = '';
+		// Get selected value
+		$selected = get_post_meta($post_id,$id,TRUE);
+		// Set default
+		if(!$selected)
+			$selected = key($choices);
+		foreach($choices as $key=>$label) {
+			// Set attributes
+			$attrs = array(
+				'name'	=> self::$option_name.'['.$id.']',
+				'class'	=> $class
+			);
+			// Create radio field
+			$field .= FeatherForm::radio($attrs,$key,$selected);
+			$field .= ' <label>'.$label.'</label><br />';
+		}
+		// Return field
+		return $field;
+	}
+
+	/**
+		Select field
+	**/
+	private static function field_select($args) {
+		extract($args);
+		// Get value
+		$value = self::get_option($id)?self::get_option($id):$std;
+		// Set attributes
+		$attrs = array(
+			'id'	=> 'feather_'.$id,
+			'name'	=> $name,
+			'class'	=> $class
+		);
+		// Create select field
+		$field = FeatherForm::select($attrs,$value,$choices);
+		// Return field
+		return $field;
+	}
+
+	/**
+		Text field
+	**/
+	private static function field_text($args) {
+		extract($args);
+		// Get value
+		$value = self::get_option($id)?self::get_option($id):$std;
+		// Set attributes
+		$attrs = array(
+			'id'	=> 'feather_'.$id,
+			'name'	=> $name,
+			'class'	=> $class?$class:'regular-text'
+		);
+		// Create text field
+		$field = FeatherForm::text($attrs,$value);
+		// Return field
+		return $field;
+	}
+
+	/**
+		Textarea field
+	**/
+	private static function field_textarea($args) {
+		extract($args);
+		// Get value
+		$value = self::get_option($id)?self::get_option($id):$std;
+		// Set attributes
+		$attrs = array(
+			'id'	=> 'feather_'.$id,
+			'name'	=> $name,
+			'class'	=> $class?$class:'large-text',
+			'cols'	=> isset($cols)?$cols:'50',
+			'rows'	=> isset($rows)?$rows:'8'
+		);
+		// Create textarea field
+		$field = '<p>'.FeatherForm::textarea($attrs,$value).'</p>';
+		// Return field
+		return $field;
 	}
 
 }
