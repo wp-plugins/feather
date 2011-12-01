@@ -229,6 +229,7 @@ class FeatherSettings extends FeatherBase {
 		);
 		// Create button
 		$field .= FeatherForm::button($attrs2);
+		$field .= '<div class="feather-image-placeholder"></div>';
 		// Return field
 		return $field;
 	}
@@ -240,7 +241,7 @@ class FeatherSettings extends FeatherBase {
 		extract($args);
 		$field = '';
 		// Get selected value
-		$selected = get_post_meta($post_id,$id,TRUE);
+		$selected = self::get_option($id)?self::get_option($id):$std;
 		// Set default
 		if(!$selected)
 			$selected = key($choices);

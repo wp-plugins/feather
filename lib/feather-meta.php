@@ -69,6 +69,7 @@ class FeatherMeta extends FeatherBase {
 				'title'		=> __('Default Title','feather'),
 				'callback'	=> __CLASS__.'::create_meta_boxes',
 				'page'		=> 'post',
+				'template'	=> NULL,
 				'context'	=> 'normal',
 				'priority'	=> 'high',
 				'args'		=> array()
@@ -181,19 +182,21 @@ class FeatherMeta extends FeatherBase {
 			if(!current_user_can('edit_post',$post_id)) { return; }
 		// Loop through meta fields
 		foreach(self::$meta as $meta) {
-			foreach($meta['args'] as $field) {
-				// Non-checkbox fields
-				if('checkbox'!=$field['type']) {
-					// Set id
-					$id = $field['id'];
-					// Save post meta
-					self::save_post_meta($post_id,$id);
-				}
-				// Checkbox fields
-				if('checkbox'==$field['type']) {
-					foreach($field['choices'] as $id=>$args) {
+			if(isset($meta['args'])) {
+				foreach($meta['args'] as $field) {
+					// Non-checkbox fields
+					if('checkbox'!=$field['type']) {
+						// Set id
+						$id = $field['id'];
 						// Save post meta
 						self::save_post_meta($post_id,$id);
+					}
+					// Checkbox fields
+					if('checkbox'==$field['type']) {
+						foreach($field['choices'] as $id=>$args) {
+							// Save post meta
+							self::save_post_meta($post_id,$id);
+						}
 					}
 				}
 			}

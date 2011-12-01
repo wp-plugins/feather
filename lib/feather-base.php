@@ -12,7 +12,7 @@
 	Jermaine Maree
 
 		@package FeatherBase
-		@version 1.2
+		@version 1.2.1
 **/
 
 //! Base structure
@@ -21,7 +21,7 @@ class FeatherBase {
 	//@{ Framework details
 	const
 		TEXT_Framework='Feather',
-		TEXT_Version='1.2';
+		TEXT_Version='1.2.1';
 	//@}
 
 	//@{ Locale-specific error/exception messages
@@ -220,6 +220,10 @@ class FeatherCore extends FeatherBase {
 			return;
 		// Initialize framework
 		self::init();
+		// Theme initialization
+		if(method_exists('FeatherTheme','init')) {
+			FeatherTheme::init();
+		}
 		// Modules
 		self::modules();
 		// Taxonomies
@@ -241,10 +245,6 @@ class FeatherCore extends FeatherBase {
 			require(FEATHER_PATH.'lib/feather-admin.php');
 			FeatherAdmin::boot();
 		}
-		// Theme initialization
-		if(method_exists('FeatherTheme','init')) {
-			FeatherTheme::init();
-		}
 	}
 
 	/**
@@ -264,6 +264,8 @@ class FeatherCore extends FeatherBase {
 			'PERMALINKS' => ($permalinks && ($permalinks != ''))?TRUE:FALSE,
 			// Version
 			'VERSION' => self::TEXT_Framework.' '.self::TEXT_Version,
+			// Deprecated
+			'DEPRECATED' => FALSE,
 			// Options Page Tabs
 			'TABS' => array(
 				'general'	=> __('General','feather'),
@@ -301,7 +303,7 @@ class FeatherCore extends FeatherBase {
 			update_option('feather',self::$option);
 		}
 		// Upgrade, if necessary
-		self::upgrade();
+		if(is_admin()) { self::upgrade(); }
 		// Custom login page
 		self::login();
 		// Maintenance page
@@ -528,15 +530,16 @@ class FeatherCore extends FeatherBase {
 	static function register_scripts() {
 		$scripts = self::get_config('SCRIPTS');
 		if($scripts) {
-			foreach(self::$config['SCRIPTS'] as $key=>$params) {
-				// Dependencies
-				$deps=isset($params['deps'])?$params['deps']:FALSE;
-				// Version
-				$ver=isset($params['ver'])?$params['ver']:'1.0';
-				// Place in footer?
-				$footer=isset($params['footer'])?$params['footer']:FALSE;
+			foreach($scripts as $key=>$params) {
+				// Defaults
+				$defaults = array(
+					'deps'		=> FALSE,
+					'ver'		=> '1.0',
+					'footer'	=> FALSE
+				);
+				extract(wp_parse_args($params,$defaults));
 				// Register script
-				wp_register_script($key,$params['src'],$deps,$ver,$footer);
+				wp_register_script($key,$src,$deps,$ver,$footer);
 			}
 		}
 	}

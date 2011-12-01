@@ -12,7 +12,7 @@
 	Jermaine Maree
 
 		@package FeatherAdmin
-		@version 1.2
+		@version 1.2.1
 **/
 
 class FeatherAdmin extends FeatherBase {
@@ -33,7 +33,7 @@ class FeatherAdmin extends FeatherBase {
 		// Admin menu
 		add_action('admin_menu',__CLASS__.'::menu');
 		// Meta boxes
-		if(!isset(self::$vars['DEPRECATED'])) {
+		if(!self::$vars['DEPRECATED']) {
 			self::meta();
 		} else {
 			self::meta_deprecated();
@@ -184,7 +184,7 @@ class FeatherAdmin extends FeatherBase {
 			@param $tabs array
 			@public
 	**/
-	static function print_tabs($tabs) {
+	static function print_tabs($tabs,$page='feather') {
 		// Current tab
 		$current = self::get_current_tab($tabs);
 		// Build tabs
@@ -198,7 +198,7 @@ class FeatherAdmin extends FeatherBase {
 		foreach($tabs as $tab=>$name) {
 			$attrs = array(
 				'class' => ($tab==$current)?'nav-tab nav-tab-active':'nav-tab',
-				'href'	=> '?page=feather&tab='.$tab
+				'href'	=> '?page='.$page.'&tab='.$tab
 			);
 			$output .= '<a'.self::attributes($attrs).'>'.$name.'</a>';
 		}
