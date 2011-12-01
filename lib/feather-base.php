@@ -12,7 +12,7 @@
 	Jermaine Maree
 
 		@package FeatherBase
-		@version 1.2.1
+		@version 1.2.2
 **/
 
 //! Base structure
@@ -21,7 +21,7 @@ class FeatherBase {
 	//@{ Framework details
 	const
 		TEXT_Framework='Feather',
-		TEXT_Version='1.2.1';
+		TEXT_Version='1.2.2';
 	//@}
 
 	//@{ Locale-specific error/exception messages
@@ -244,6 +244,11 @@ class FeatherCore extends FeatherBase {
 		if(is_admin()) {
 			require(FEATHER_PATH.'lib/feather-admin.php');
 			FeatherAdmin::boot();
+		}
+		// Non-admin configuration
+		if(!is_admin()) {
+			// Add action for theme head
+			add_action('template_redirect',__CLASS__.'::theme_head');
 		}
 	}
 
