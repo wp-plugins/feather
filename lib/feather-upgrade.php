@@ -26,16 +26,19 @@ class FeatherUpgrade extends FeatherBase {
 		$version = self::get_option('version');
 		switch($version) {
 			case '1.0.6':
-				self::upgrade_122();
+				self::upgrade_123();
 				break;
 			case '1.1':
-				self::upgrade_122();
+				self::upgrade_123();
 				break;
 			case '1.2':
-				self::upgrade_122();
+				self::upgrade_123();
 				break;
 			case '1.2.1':
-				self::upgrade_122();
+				self::upgrade_123();
+				break;
+			case '1.2.2':
+				self::upgrade_123();
 				break;
 		}
 	}
@@ -44,8 +47,8 @@ class FeatherUpgrade extends FeatherBase {
 		Upgrade to 1.2.2
 			@private
 	**/
-	private static function upgrade_122() {
-		self::$option['version']='1.2.2';
+	private static function upgrade_123() {
+		self::$option['version']='1.2.3';
 		update_option('feather',self::$option);
 	}
 
