@@ -180,6 +180,8 @@ class FeatherMeta extends FeatherBase {
 			if(!current_user_can('edit_page',$post_id)) { return; }
 		if ('post'==$_POST['post_type'])
 			if(!current_user_can('edit_post',$post_id)) { return; }
+		// Extend allowedposttags
+		self::extend_allowedposttags();
 		// Loop through meta fields
 		foreach(self::$meta as $meta) {
 			if(isset($meta['args'])) {
@@ -221,6 +223,51 @@ class FeatherMeta extends FeatherBase {
 		if((''==$new) && $old) {
 			delete_post_meta($post_id,$id,$old);
 		}
+	}
+
+	/**
+		Extend $allowedposttags
+			@private
+	**/
+	private static function extend_allowedposttags() {
+		global $allowedposttags;
+		// iframe
+		$allowedposttags["iframe"] = array(
+			"id" => array(),
+			"class" => array(),
+			"title" => array(),
+			"style" => array(),
+			"align" => array(),
+			"frameborder" => array(),
+			"longdesc" => array(),
+			"marginheight" => array(),
+			"marginwidth" => array(),
+			"name" => array(),
+			"scrolling" => array(),
+			"src" => array(),
+			"height" => array(),
+			"width" => array(),
+			"allowfullscreen" => array()
+		);
+		// object
+		$allowedposttags["object"] = array(
+			"height" => array(),
+			"width" => array()
+		);
+		// param
+		$allowedposttags["param"] = array(
+			"name" => array(),
+			"value" => array()
+		);
+		// embed
+		$allowedposttags["embed"] = array(
+			"src" => array(),
+			"type" => array(),
+			"allowfullscreen" => array(),
+			"allowscriptaccess" => array(),
+			"height" => array(),
+			"width" => array()
+		);
 	}
 
 	/**
