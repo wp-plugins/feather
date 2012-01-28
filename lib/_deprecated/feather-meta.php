@@ -231,6 +231,9 @@ class FeatherMeta extends FeatherBase {
 		if ('post'==$_POST['post_type'])
 			if(!current_user_can('edit_post',$post_id)) { return; }
 
+		// Extend $allowedposttags
+		self::extend_allowedposttags();
+
 		// Loop through fields
 		foreach(self::$theme_meta as $mid=>$meta) {
 			if($meta['page']==$_POST['post_type']) {
@@ -278,6 +281,51 @@ class FeatherMeta extends FeatherBase {
 				}
 			}
 		}
+	}
+
+	/**
+		Extend $allowedposttags
+			@private
+	**/
+	private static function extend_allowedposttags() {
+		global $allowedposttags;
+		// iframe
+		$allowedposttags["iframe"] = array(
+			"id" => array(),
+			"class" => array(),
+			"title" => array(),
+			"style" => array(),
+			"align" => array(),
+			"frameborder" => array(),
+			"longdesc" => array(),
+			"marginheight" => array(),
+			"marginwidth" => array(),
+			"name" => array(),
+			"scrolling" => array(),
+			"src" => array(),
+			"height" => array(),
+			"width" => array(),
+			"allowfullscreen" => array()
+		);
+		// object
+		$allowedposttags["object"] = array(
+			"height" => array(),
+			"width" => array()
+		);
+		// param
+		$allowedposttags["param"] = array(
+			"name" => array(),
+			"value" => array()
+		);
+		// embed
+		$allowedposttags["embed"] = array(
+			"src" => array(),
+			"type" => array(),
+			"allowfullscreen" => array(),
+			"allowscriptaccess" => array(),
+			"height" => array(),
+			"width" => array()
+		);
 	}
 
 }
