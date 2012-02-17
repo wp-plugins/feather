@@ -12,7 +12,7 @@
 	Jermaine Maree
 
 		@package FeatherUpgrade
-		@version 1.2.1
+		@version 1.2.6
 **/
 
 //! Upgrade Feather
@@ -26,35 +26,38 @@ class FeatherUpgrade extends FeatherBase {
 		$version = self::get_option('version');
 		switch($version) {
 			case '1.0.6':
-				self::upgrade_125();
+				self::upgrade_126();
 				break;
 			case '1.1':
-				self::upgrade_125();
+				self::upgrade_126();
 				break;
 			case '1.2':
-				self::upgrade_125();
+				self::upgrade_126();
 				break;
 			case '1.2.1':
-				self::upgrade_125();
+				self::upgrade_126();
 				break;
 			case '1.2.2':
-				self::upgrade_125();
+				self::upgrade_126();
 				break;
 			case '1.2.3':
-				self::upgrade_125();
+				self::upgrade_126();
 				break;
 			case '1.2.4':
-				self::upgrade_125();
+				self::upgrade_126();
+				break;
+			case '1.2.5':
+				self::upgrade_126();
 				break;
 		}
 	}
 
 	/**
-		Upgrade to 1.2.5
+		Upgrade to 1.2.6
 			@private
 	**/
-	private static function upgrade_125() {
-		self::$option['version']='1.2.5';
+	private static function upgrade_126() {
+		self::$option['version']='1.2.6';
 		update_option('feather',self::$option);
 	}
 

@@ -12,7 +12,7 @@
 	Jermaine Maree
 
 		@package FeatherAdmin
-		@version 1.2.1
+		@version 1.2.6
 **/
 
 class FeatherAdmin extends FeatherBase {
@@ -55,9 +55,9 @@ class FeatherAdmin extends FeatherBase {
 		// Plugin-specific actions
 		add_action('load-'.self::$hook,__CLASS__.'::feather_init');
 		// Plugin styles
-		add_action('admin_print_styles-'.self::$hook,__CLASS__.'::styles');
+		add_action('admin_enqueue_scripts',__CLASS__.'::styles');
 		// Plugin scripts
-		add_action('admin_print_scripts-'.self::$hook,__CLASS__.'::scripts');
+		add_action('admin_enqueue_scripts',__CLASS__.'::scripts');
 	}
 
 	/**
@@ -134,38 +134,42 @@ class FeatherAdmin extends FeatherBase {
 		Scripts
 			@public
 	**/
-	static function scripts() {
-		// Javascript URL
-		$url = FEATHER_URL.'assets/js/';
-		// Javascript Path
-		$path = FEATHER_PATH.'assets/js/';
-		// Register colorpicker.js
-		wp_register_script('feather-color-js',$url.'colorpicker.js',array('jquery'));
-		// feather.js Dependencies
-		$js_dep = array('media-upload','thickbox','jquery','feather-color-js');
-		// feather.js Version
-		$js_ver = filemtime($path.'feather.js');
-		// Enqueue feather.js script
-		wp_enqueue_script('feather-js',$url.'feather.js',$js_dep,$js_ver);
+	static function scripts($hook) {
+		if($hook == self::$hook) {
+			// Javascript URL
+			$url = FEATHER_URL.'assets/js/';
+			// Javascript Path
+			$path = FEATHER_PATH.'assets/js/';
+			// Register colorpicker.js
+			wp_register_script('feather-color-js',$url.'colorpicker.js',array('jquery'));
+			// feather.js Dependencies
+			$js_dep = array('media-upload','thickbox','jquery','feather-color-js');
+			// feather.js Version
+			$js_ver = filemtime($path.'feather.js');
+			// Enqueue feather.js script
+			wp_enqueue_script('feather-js',$url.'feather.js',$js_dep,$js_ver);
+		}
 	}
 
 	/**
 		Styles
 			@public
 	**/
-	static function styles() {
-		// CSS URL
-		$url = FEATHER_URL.'assets/css/';
-		// CSS Path
-		$path = FEATHER_PATH.'assets/css/';
-		// Register colorpicker.css
-		wp_register_style('feather-color-css',$url.'colorpicker.css',FALSE);
-		// feather.css Dependencies
-		$css_dep = array('thickbox','feather-color-css');
-		// feather.css Version
-		$css_ver = filemtime($path.'feather.css');
-		// Enqueue style
-		wp_enqueue_style('feather-css',$url.'feather.css',$css_dep,$css_ver);
+	static function styles($hook) {
+		if($hook == self::$hook) {
+			// CSS URL
+			$url = FEATHER_URL.'assets/css/';
+			// CSS Path
+			$path = FEATHER_PATH.'assets/css/';
+			// Register colorpicker.css
+			wp_register_style('feather-color-css',$url.'colorpicker.css',FALSE);
+			// feather.css Dependencies
+			$css_dep = array('thickbox','feather-color-css');
+			// feather.css Version
+			$css_ver = filemtime($path.'feather.css');
+			// Enqueue style
+			wp_enqueue_style('feather-css',$url.'feather.css',$css_dep,$css_ver);
+		}
 	}
 
 	/**
