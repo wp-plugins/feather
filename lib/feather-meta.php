@@ -12,7 +12,7 @@
 	Jermaine Maree
 
 		@package FeatherMeta
-		@version 1.2
+		@version 1.2.7
 **/
 
 //! Settings
@@ -30,13 +30,14 @@ class FeatherMeta extends FeatherBase {
 	**/
 	static function init() {
 		// Process meta
-		self::process_meta();
-		// Load form library
-		require(FEATHER_PATH.'lib/feather-form.php');
-		// Add meta boxes
-		add_action('add_meta_boxes',__CLASS__.'::add_meta_boxes');
-		// Add action to save meta
-		add_action('save_post',__CLASS__.'::save_meta');
+		if(self::process_meta()) {
+			// Load form library
+			require(FEATHER_PATH.'lib/feather-form.php');
+			// Add meta boxes
+			add_action('add_meta_boxes',__CLASS__.'::add_meta_boxes');
+			// Add action to save meta
+			add_action('save_post',__CLASS__.'::save_meta');
+		}
 	}
 
 	/**
@@ -46,6 +47,9 @@ class FeatherMeta extends FeatherBase {
 	private static function process_meta() {
 		// Theme meta
 		$meta = FeatherConfig::load('meta','meta');
+		// Is $meta is empty?
+		if(!$meta || !is_array($meta))
+			return FALSE;
 		// Sections
 		self::$meta = $meta['sections'];
 		unset($meta['sections']);
@@ -56,6 +60,8 @@ class FeatherMeta extends FeatherBase {
 				self::$meta[$section]['args'][] = $field;
 			}
 		}
+		// Meta processed
+		return TRUE;
 	}
 
 	/**
